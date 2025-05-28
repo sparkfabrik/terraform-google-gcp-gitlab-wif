@@ -76,7 +76,7 @@ variable "gitlab_gcp_wif_service_account_email_variable_name" {
 variable "gitlab_variables_description" {
   description = "The description for the GitLab variables created by this module. You can use `{{MANAGER_NAME}}` to include the name of the 'manager' defined in `gitlab_variables_description_manager_name`."
   type        = string
-  default     = "This variable is managed by {{MANAGER_NAME}}."
+  default     = "Managed by {{MANAGER_NAME}}."
 }
 
 variable "gitlab_variables_description_manager_name" {
