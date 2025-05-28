@@ -73,6 +73,18 @@ variable "gitlab_gcp_wif_service_account_email_variable_name" {
   default     = "GCP_WIF_SERVICE_ACCOUNT_EMAIL"
 }
 
+variable "gitlab_variables_description" {
+  description = "The description for the GitLab variables created by this module. You can use `{{MANAGER_NAME}}` to include the name of the 'manager' defined in `gitlab_variables_description_manager_name`."
+  type        = string
+  default     = "This variable is managed by {{MANAGER_NAME}}."
+}
+
+variable "gitlab_variables_description_manager_name" {
+  description = "The name of the manager to include in the GitLab variable description."
+  type        = string
+  default     = "terraform-google-gcp-gitlab-wif module"
+}
+
 # Secret Manager variables
 variable "secret_gcp_project_id" {
   description = "The GCP project ID where secrets will be created. If not provided, defaults to `var.gcp_project_id`."

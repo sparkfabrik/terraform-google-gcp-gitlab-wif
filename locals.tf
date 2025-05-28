@@ -41,4 +41,6 @@ locals {
   }
 
   secret_gcp_project_id = var.secret_gcp_project_id != null ? var.secret_gcp_project_id : var.gcp_project_id
+
+  gitlab_variables_description = replace(var.gitlab_variables_description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
 }
