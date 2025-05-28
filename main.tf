@@ -16,12 +16,12 @@ resource "google_iam_workload_identity_pool" "this" {
   lifecycle {
     # Prevent creation of resources if the module is not configured correctly
     precondition {
-      condition     = (var.gitlab_group_id != null && var.gitlab_group_id > 0) || (var.gitlab_project_id != null && var.gitlab_project_id > 0)
+      condition     = var.gitlab_group_id > 0 || var.gitlab_project_id > 0
       error_message = "Either gitlab_group_id or gitlab_project_id must be provided."
     }
 
     precondition {
-      condition     = var.gitlab_group_id != null && var.gitlab_project_id == null
+      condition     = (var.gitlab_group_id > 0) != (var.gitlab_project_id > 0)
       error_message = "Only one of gitlab_group_id or gitlab_project_id should be provided, not both."
     }
   }
