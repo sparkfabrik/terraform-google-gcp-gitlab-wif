@@ -1,9 +1,8 @@
-# Terraform Module Template
+# Terraform Google Cloud Platform Workload Identity Federation for GitLab
 
-This project can be used as a template for the initial stub of a Terraform 
-module. 
+This Terraform module sets up Google Cloud Platform (GCP) Workload Identity Federation (WIF) resources in order to allow GitLab CI/CD pipelines to authenticate with GCP. It creates a Workload Identity Pool, a Workload Identity Provider, and optionally a service account, and creates GitLab variables to store the necessary information to be used in GitLab CI/CD pipelines to perform the authentication.
 
-We suggest following Terraform best practices as described in https://www.terraform-best-practices.com/code-structure.
+You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/cloud_services/google_cloud/) about configure OpenID Connect with GCP Workload Identity Federation.
 
 <!-- BEGIN_TF_DOCS -->
 ## Providers
@@ -34,9 +33,9 @@ We suggest following Terraform best practices as described in https://www.terraf
 | <a name="input_gitlab_gcp_wif_project_id_variable_name"></a> [gitlab\_gcp\_wif\_project\_id\_variable\_name](#input\_gitlab\_gcp\_wif\_project\_id\_variable\_name) | The name of the GitLab variable to store the GCP project ID for WIF. | `string` | `"GCP_WIF_PROJECT_ID"` | no |
 | <a name="input_gitlab_gcp_wif_provider_variable_name"></a> [gitlab\_gcp\_wif\_provider\_variable\_name](#input\_gitlab\_gcp\_wif\_provider\_variable\_name) | The name of the GitLab variable to store the GCP WIF provider name. | `string` | `"GCP_WIF_PROVIDER"` | no |
 | <a name="input_gitlab_gcp_wif_service_account_email_variable_name"></a> [gitlab\_gcp\_wif\_service\_account\_email\_variable\_name](#input\_gitlab\_gcp\_wif\_service\_account\_email\_variable\_name) | The name of the GitLab variable to store the GCP WIF service account email. | `string` | `"GCP_WIF_SERVICE_ACCOUNT_EMAIL"` | no |
-| <a name="input_gitlab_group_id"></a> [gitlab\_group\_id](#input\_gitlab\_group\_id) | The GitLab group ID to allow access from. Use this for group-level access. | `string` | `null` | no |
+| <a name="input_gitlab_group_id"></a> [gitlab\_group\_id](#input\_gitlab\_group\_id) | The GitLab group ID to allow access from. Use this for group-level access. | `number` | `0` | no |
 | <a name="input_gitlab_instance_url"></a> [gitlab\_instance\_url](#input\_gitlab\_instance\_url) | The URL of your GitLab instance. | `string` | `"https://gitlab.com"` | no |
-| <a name="input_gitlab_project_id"></a> [gitlab\_project\_id](#input\_gitlab\_project\_id) | The GitLab project ID to allow access from. Use this for project-level access. | `string` | `null` | no |
+| <a name="input_gitlab_project_id"></a> [gitlab\_project\_id](#input\_gitlab\_project\_id) | The GitLab project ID to allow access from. Use this for project-level access. | `number` | `0` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name to use for all resources created by this module. | `string` | n/a | yes |
 | <a name="input_secret_gcp_project_id"></a> [secret\_gcp\_project\_id](#input\_secret\_gcp\_project\_id) | The GCP project ID where secrets will be created. If not provided, defaults to `var.gcp_project_id`. | `string` | `null` | no |
 | <a name="input_secret_names"></a> [secret\_names](#input\_secret\_names) | List of secret names to create and grant access to. | `list(string)` | `[]` | no |
@@ -45,7 +44,16 @@ We suggest following Terraform best practices as described in https://www.terraf
 
 | Name | Description |
 |------|-------------|
-| <a name="output_example"></a> [example](#output\_example) | The name of the resource. |
+| <a name="output_gitlab_variables"></a> [gitlab\_variables](#output\_gitlab\_variables) | The GitLab variables created by this module. |
+| <a name="output_principal_set"></a> [principal\_set](#output\_principal\_set) | The principal set string used for IAM bindings. |
+| <a name="output_secret_created"></a> [secret\_created](#output\_secret\_created) | The names and IDs of the secrets created by this module. |
+| <a name="output_secret_ids"></a> [secret\_ids](#output\_secret\_ids) | Map of original secret names to their Secret Manager secret IDs |
+| <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of original secret names to their formatted names |
+| <a name="output_secret_project_id"></a> [secret\_project\_id](#output\_secret\_project\_id) | The GCP project ID where secrets are stored. |
+| <a name="output_secret_versions"></a> [secret\_versions](#output\_secret\_versions) | Map of original secret names to their latest Secret Manager version names |
+| <a name="output_service_account_email"></a> [service\_account\_email](#output\_service\_account\_email) | The email of the Service Account used. |
+| <a name="output_workload_identity_pool_name"></a> [workload\_identity\_pool\_name](#output\_workload\_identity\_pool\_name) | The name of the Workload Identity Pool. |
+| <a name="output_workload_identity_pool_provider"></a> [workload\_identity\_pool\_provider](#output\_workload\_identity\_pool\_provider) | The full resource name of the Workload Identity Provider. |
 
 ## Resources
 

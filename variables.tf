@@ -25,22 +25,22 @@ variable "gcp_existing_service_account_account_id" {
 variable "gitlab_group_id" {
   description = "The GitLab group ID to allow access from. Use this for group-level access."
   type        = number
-  default     = null
+  default     = 0
 
   validation {
-    condition     = var.gitlab_group_id == null || var.gitlab_group_id > 0
-    error_message = "gitlab_group_id must be a valid GitLab group ID or null."
+    condition     = var.gitlab_group_id >= 0
+    error_message = "gitlab_group_id must be a valid GitLab group ID or 0 for non-set value (everything will be configured for project-level access)."
   }
 }
 
 variable "gitlab_project_id" {
   description = "The GitLab project ID to allow access from. Use this for project-level access."
   type        = number
-  default     = null
+  default     = 0
 
   validation {
-    condition     = var.gitlab_project_id == null || var.gitlab_project_id > 0
-    error_message = "gitlab_project_id must be a valid GitLab project ID or null."
+    condition     = var.gitlab_project_id >= 0
+    error_message = "gitlab_project_id must be a valid GitLab project ID or 0 for non-set value (everything will be configured for group-level access)."
   }
 }
 

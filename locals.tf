@@ -1,7 +1,7 @@
 locals {
   resource_name_suffix    = "${var.name}-${random_id.suffix.hex}"
-  is_gitlab_group_level   = var.gitlab_group_id != null
-  is_gitlab_project_level = var.gitlab_project_id != null
+  is_gitlab_group_level   = var.gitlab_group_id > 0
+  is_gitlab_project_level = var.gitlab_project_id > 0
   attribute_condition     = local.is_gitlab_project_level ? "assertion.project_id==\"${var.gitlab_project_id}\"" : "assertion.namespace_id==\"${var.gitlab_group_id}\""
   principal_subject       = local.is_gitlab_project_level ? "attribute.project_id/${var.gitlab_project_id}" : "attribute.namespace_id/${var.gitlab_group_id}"
   principal_set           = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${local.principal_subject}"
