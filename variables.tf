@@ -67,6 +67,7 @@ variable "gitlab_gcp_wif_provider_variable_name" {
   type        = string
   default     = "GCP_WIF_PROVIDER"
 }
+
 variable "gitlab_gcp_wif_service_account_email_variable_name" {
   description = "The name of the GitLab variable to store the GCP WIF service account email."
   type        = string
@@ -83,6 +84,17 @@ variable "gitlab_variables_description_manager_name" {
   description = "The name of the manager to include in the GitLab variable description."
   type        = string
   default     = "terraform-google-gcp-gitlab-wif module"
+}
+
+variable "gitlab_variables_additional" {
+  description = "Additional GitLab variables to create. This should be a map where the key is the variable name and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied."
+  type = map(object({
+    value       = string
+    protected   = optional(bool, false)
+    masked      = optional(bool, false)
+    description = optional(string, "Managed by {{MANAGER_NAME}}.")
+  }))
+  default = {}
 }
 
 # Secret Manager variables
