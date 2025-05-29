@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-05-29
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.3.0...0.3.1)
+
+### Changed
+
+- Change `google_service_account_iam_binding` to `google_service_account_iam_member` for the role `roles/iam.workloadIdentityUser` to the desired service account to avoid issues with multiple bindings for the same role (e.g., when using the Workload Identity Federation for GKE clusters).
+
 ## [0.3.0] - 2025-05-29
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.2.0...0.3.0)
