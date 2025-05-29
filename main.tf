@@ -67,11 +67,8 @@ data "google_service_account" "this" {
   account_id = var.gcp_existing_service_account_account_id
 }
 
-resource "google_service_account_iam_binding" "this" {
+resource "google_service_account_iam_member" "this" {
   service_account_id = local.sa_name
   role               = "roles/iam.workloadIdentityUser"
-
-  members = [
-    local.principal_set
-  ]
+  member             = local.principal_set
 }
