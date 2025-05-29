@@ -21,12 +21,18 @@ output "principal_set" {
 # GitLab variables outputs
 output "gitlab_variables" {
   description = "The GitLab variables created by this module."
-  value = {
-    (var.gitlab_gcp_wif_project_id_variable_name)            = var.gcp_project_id
-    (var.gitlab_gcp_wif_pool_variable_name)                  = google_iam_workload_identity_pool.this.name
-    (var.gitlab_gcp_wif_provider_variable_name)              = google_iam_workload_identity_pool_provider.this.name
-    (var.gitlab_gcp_wif_service_account_email_variable_name) = local.sa_email
-  }
+  value = merge(
+    {
+      (var.gitlab_gcp_wif_project_id_variable_name)            = var.gcp_project_id
+      (var.gitlab_gcp_wif_pool_variable_name)                  = google_iam_workload_identity_pool.this.name
+      (var.gitlab_gcp_wif_provider_variable_name)              = google_iam_workload_identity_pool_provider.this.name
+      (var.gitlab_gcp_wif_service_account_email_variable_name) = local.sa_email
+    },
+    length(local.gitlab_variables_additional_final) > 0 ? {
+      for key, value in local.gitlab_variables_additional_final :
+      key => local.is_gitlab_group_level ? gitlab_group_variable.gitlab_variables_additional[key].value : gitlab_project_variable.gitlab_variables_additional[key].value
+    } : {}
+  )
 }
 
 # Secret manager outputs

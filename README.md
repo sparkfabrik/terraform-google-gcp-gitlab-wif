@@ -36,6 +36,7 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | <a name="input_gitlab_group_id"></a> [gitlab\_group\_id](#input\_gitlab\_group\_id) | The GitLab group ID to allow access from. Use this for group-level access. | `number` | `0` | no |
 | <a name="input_gitlab_instance_url"></a> [gitlab\_instance\_url](#input\_gitlab\_instance\_url) | The URL of your GitLab instance. | `string` | `"https://gitlab.com"` | no |
 | <a name="input_gitlab_project_id"></a> [gitlab\_project\_id](#input\_gitlab\_project\_id) | The GitLab project ID to allow access from. Use this for project-level access. | `number` | `0` | no |
+| <a name="input_gitlab_variables_additional"></a> [gitlab\_variables\_additional](#input\_gitlab\_variables\_additional) | Additional GitLab variables to create. This should be a map where the key is the variable name and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied. | <pre>map(object({<br/>    value       = string<br/>    protected   = optional(bool, false)<br/>    masked      = optional(bool, false)<br/>    description = optional(string, "Managed by {{MANAGER_NAME}}.")<br/>  }))</pre> | `{}` | no |
 | <a name="input_gitlab_variables_description"></a> [gitlab\_variables\_description](#input\_gitlab\_variables\_description) | The description for the GitLab variables created by this module. You can use `{{MANAGER_NAME}}` to include the name of the 'manager' defined in `gitlab_variables_description_manager_name`. | `string` | `"Managed by {{MANAGER_NAME}}."` | no |
 | <a name="input_gitlab_variables_description_manager_name"></a> [gitlab\_variables\_description\_manager\_name](#input\_gitlab\_variables\_description\_manager\_name) | The name of the manager to include in the GitLab variable description. | `string` | `"terraform-google-gcp-gitlab-wif module"` | no |
 | <a name="input_name"></a> [name](#input\_name) | The name to use for all resources created by this module. | `string` | n/a | yes |
@@ -65,10 +66,12 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | [gitlab_group_variable.gcp_wif_project_id](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/group_variable) | resource |
 | [gitlab_group_variable.gcp_wif_provider](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/group_variable) | resource |
 | [gitlab_group_variable.gcp_wif_service_account_email](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/group_variable) | resource |
+| [gitlab_group_variable.gitlab_variables_additional](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/group_variable) | resource |
 | [gitlab_project_variable.gcp_wif_pool](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/project_variable) | resource |
 | [gitlab_project_variable.gcp_wif_project_id](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/project_variable) | resource |
 | [gitlab_project_variable.gcp_wif_provider](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/project_variable) | resource |
 | [gitlab_project_variable.gcp_wif_service_account_email](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/project_variable) | resource |
+| [gitlab_project_variable.gitlab_variables_additional](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/resources/project_variable) | resource |
 | [google_iam_workload_identity_pool.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iam_workload_identity_pool) | resource |
 | [google_iam_workload_identity_pool_provider.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iam_workload_identity_pool_provider) | resource |
 | [google_secret_manager_secret.secrets](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/secret_manager_secret) | resource |
