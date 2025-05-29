@@ -21,6 +21,26 @@ variable "gcp_existing_service_account_account_id" {
   default     = null
 }
 
+variable "gcp_workload_identity_pool_provider_attribute_mapping" {
+  description = "A map of attribute mappings for the GCP Workload Identity Federation provider. This allows you to customize how attributes are mapped from GitLab to GCP."
+  type        = map(string)
+  default = {
+    "google.subject"                 = "assertion.user_email+\"::\"+assertion.project_id+\"::\"+assertion.job_id"
+    "attribute.aud"                  = "assertion.aud"
+    "attribute.project_id"           = "assertion.project_id"
+    "attribute.namespace_id"         = "assertion.namespace_id"
+    "attribute.user_email"           = "assertion.user_email"
+    "attribute.ref"                  = "assertion.ref"
+    "attribute.ref_type"             = "assertion.ref_type"
+    "attribute.custom_assertion_sub" = "assertion.sub"
+  }
+
+  validation {
+    condition     = length(var.gcp_workload_identity_pool_provider_attribute_mapping) > 0 && contains(keys(var.gcp_workload_identity_pool_provider_attribute_mapping), "google.subject") && length(var.gcp_workload_identity_pool_provider_attribute_mapping["google.subject"]) > 0
+    error_message = "gcp_workload_identity_pool_provider_attribute_mapping must contain a non-empty 'google.subject' mapping."
+  }
+}
+
 # GitLab variables
 variable "gitlab_group_id" {
   description = "The GitLab group ID to allow access from. Use this for group-level access."

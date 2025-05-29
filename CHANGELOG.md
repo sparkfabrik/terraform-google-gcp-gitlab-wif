@@ -8,6 +8,22 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-05-29
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.3.1...0.4.0)
+
+### :warning: Breaking change
+
+The default attribute mapping for `google.subject` has changed, see below. Consider updating your configuration accordingly.
+
+### Added
+
+- Add `gcp_workload_identity_pool_provider_attribute_mapping` to allow customization of the attribute mapping for the GCP Workload Identity Pool Provider.
+
+### Changed
+
+- Change the default attribute mapping for the GCP Workload Identity Pool Provider from `google.subject = assertion.sub` to `google.subject = assertion.user_email+"::"+assertion.project_id+"::"+assertion.job_id`. This prevents issues with very long branch names (`assertion.sub` contains the branch name, see [here](https://docs.gitlab.com/ci/secrets/id_token_authentication/#token-payload) for more details) and could be useful for Audit Logs and other purposes.
+
 ## [0.3.1] - 2025-05-29
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.3.0...0.3.1)

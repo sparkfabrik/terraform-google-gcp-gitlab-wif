@@ -33,18 +33,8 @@ resource "google_iam_workload_identity_pool_provider" "this" {
   workload_identity_pool_provider_id = "provider-${substr(local.resource_name_suffix, 0, 32 - length("provider-"))}"
   display_name                       = local.provider_display_name
   description                        = "OIDC identity pool provider for ${var.name}"
-
-  attribute_mapping = {
-    "google.subject"         = "assertion.sub"
-    "attribute.aud"          = "assertion.aud"
-    "attribute.project_id"   = "assertion.project_id"
-    "attribute.namespace_id" = "assertion.namespace_id"
-    "attribute.user_email"   = "assertion.user_email"
-    "attribute.ref"          = "assertion.ref"
-    "attribute.ref_type"     = "assertion.ref_type"
-  }
-
-  attribute_condition = local.attribute_condition
+  attribute_mapping                  = var.gcp_workload_identity_pool_provider_attribute_mapping
+  attribute_condition                = local.attribute_condition
 
   oidc {
     issuer_uri        = var.gitlab_instance_url
