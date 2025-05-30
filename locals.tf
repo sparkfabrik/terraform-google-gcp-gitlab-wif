@@ -1,10 +1,24 @@
 locals {
-  resource_name_suffix    = "${var.name}-${random_id.suffix.hex}"
-  is_gitlab_group_level   = var.gitlab_group_id > 0
-  is_gitlab_project_level = var.gitlab_project_id > 0
-  attribute_condition     = local.is_gitlab_project_level ? "assertion.project_id==\"${var.gitlab_project_id}\"" : "assertion.namespace_id==\"${var.gitlab_group_id}\""
-  principal_subject       = local.is_gitlab_project_level ? "attribute.project_id/${var.gitlab_project_id}" : "attribute.namespace_id/${var.gitlab_group_id}"
-  principal_set           = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${local.principal_subject}"
+  resource_name_suffix = "${var.name}-${random_id.suffix.hex}"
+
+  project_resource_suffix              = "project"
+  group_resource_suffix                = "group"
+  custom_id_group_valid_attribute_name = "custom_is_group_valid"
+
+  projects_attribute_condition = "(${join(" || ", [for id in var.gitlab_project_ids : "attribute.project_id==\"${id}\""])})"
+  groups_attribute_condition   = "(attribute.${local.custom_id_group_valid_attribute_name}==\"1\")"
+  attribute_condition = join(" || ", concat(
+    length(var.gitlab_project_ids) > 0 ? [local.projects_attribute_condition] : [],
+    length(var.gitlab_group_ids) > 0 ? [local.groups_attribute_condition] : []
+  ))
+
+  principal_subjects = merge(
+    { for id in var.gitlab_project_ids : "${local.project_resource_suffix}-${id}" => "attribute.project_id/${id}" },
+    { (local.group_resource_suffix) = "attribute.${local.custom_id_group_valid_attribute_name}/1" },
+  )
+  principal_sets = {
+    for key, subject in local.principal_subjects : key => "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${subject}"
+  }
 
   # Ensure the account_id is always 28 characters or less
   sa_name_prefix    = "gwif-sa-"
@@ -43,13 +57,37 @@ locals {
   secret_gcp_project_id = var.secret_gcp_project_id != null ? var.secret_gcp_project_id : var.gcp_project_id
 
   gitlab_variables_description = replace(var.gitlab_variables_description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
+
+  gitlab_variables_additional_group = flatten([
+    for gitlab_resource_id in var.gitlab_group_ids : [
+      for key, value in var.gitlab_variables_additional : [
+        merge(
+          value,
+          {
+            gitlab_resource_type = local.group_resource_suffix,
+            gitlab_resource_id   = gitlab_resource_id,
+            key                  = key,
+            description          = replace(value.description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
+          }
+        )
+      ]
+  ]])
+  gitlab_variables_additional_project = flatten([
+    for gitlab_resource_id in var.gitlab_project_ids : [
+      for key, value in var.gitlab_variables_additional : [
+        merge(
+          value,
+          {
+            gitlab_resource_type = local.project_resource_suffix,
+            gitlab_resource_id   = gitlab_resource_id,
+            key                  = key,
+            description          = replace(value.description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
+          }
+        )
+      ]
+  ]])
   gitlab_variables_additional_final = {
-    for key, value in var.gitlab_variables_additional :
-    key => merge(
-      value,
-      {
-        description = replace(value.description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
-      }
-    )
+    for item in concat(local.gitlab_variables_additional_group, local.gitlab_variables_additional_project) :
+    "${item.key}--${item.gitlab_resource_type}--${item.gitlab_resource_id}" => item
   }
 }

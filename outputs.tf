@@ -6,7 +6,7 @@ output "workload_identity_pool_name" {
 
 output "workload_identity_pool_provider" {
   description = "The full resource name of the Workload Identity Provider."
-  value       = google_iam_workload_identity_pool_provider.this.name
+  value       = google_iam_workload_identity_pool_provider.this.workload_identity_pool_provider_id
 }
 output "service_account_email" {
   description = "The email of the Service Account used."
@@ -14,8 +14,8 @@ output "service_account_email" {
 }
 
 output "principal_set" {
-  description = "The principal set string used for IAM bindings."
-  value       = local.principal_set
+  description = "The principal sets string used for IAM bindings."
+  value       = local.principal_sets
 }
 
 # GitLab variables outputs
@@ -28,9 +28,9 @@ output "gitlab_variables" {
       (var.gitlab_gcp_wif_provider_variable_name)              = google_iam_workload_identity_pool_provider.this.name
       (var.gitlab_gcp_wif_service_account_email_variable_name) = local.sa_email
     },
-    length(local.gitlab_variables_additional_final) > 0 ? {
-      for key, value in local.gitlab_variables_additional_final :
-      key => local.is_gitlab_group_level ? gitlab_group_variable.gitlab_variables_additional[key].value : gitlab_project_variable.gitlab_variables_additional[key].value
+    length(var.gitlab_variables_additional) > 0 ? {
+      for key, val in var.gitlab_variables_additional :
+      key => val.value
     } : {}
   )
 }
