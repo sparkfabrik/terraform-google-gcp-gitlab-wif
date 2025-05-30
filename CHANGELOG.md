@@ -8,6 +8,50 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-05-30
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.4.0...0.5.0)
+
+### :warning: Breaking change
+
+The variables `gitlab_group_id` and `gitlab_project_id` have been renamed to `gitlab_group_ids` and `gitlab_project_ids` and the type has been changed from `string` to `list(string)`. This allows for multiple group and project IDs to be specified.
+
+You can update your configuration simply by changing the variable names and wrapping the existing values in a list, like this:
+
+**From:**
+
+```hcl
+module "example" {
+  source  = "github.com/sparkfabrik/terraform-google-gcp-gitlab-wif?ref=main"
+  version = ">= 0.1.0"
+
+  name              = "My Workload Identity Federation"
+  gcp_project_id    = "awesome-gcp-project"
+  gitlab_project_id = 42
+}
+```
+
+**To:**
+
+```hcl
+module "example" {
+  source  = "github.com/sparkfabrik/terraform-google-gcp-gitlab-wif?ref=main"
+  version = ">= 0.1.0"
+
+  name               = "My Workload Identity Federation"
+  gcp_project_id     = "awesome-gcp-project"
+  gitlab_project_ids = [42]
+}
+```
+
+### Added
+
+- You can add GitLab groups and projects together with the same module, allowing for more flexibility in managing multiple GitLab groups and projects usint the same OIDC provider configuration.
+
+### Changed
+
+- Change the variables `gitlab_group_id` and `gitlab_project_id` to `gitlab_group_ids` and `gitlab_project_ids`, allowing for multiple group and project IDs to be specified.
+
 ## [0.4.0] - 2025-05-29
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.3.1...0.4.0)

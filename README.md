@@ -34,9 +34,9 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | <a name="input_gitlab_gcp_wif_project_id_variable_name"></a> [gitlab\_gcp\_wif\_project\_id\_variable\_name](#input\_gitlab\_gcp\_wif\_project\_id\_variable\_name) | The name of the GitLab variable to store the GCP project ID for WIF. | `string` | `"GCP_WIF_PROJECT_ID"` | no |
 | <a name="input_gitlab_gcp_wif_provider_variable_name"></a> [gitlab\_gcp\_wif\_provider\_variable\_name](#input\_gitlab\_gcp\_wif\_provider\_variable\_name) | The name of the GitLab variable to store the GCP WIF provider name. | `string` | `"GCP_WIF_PROVIDER"` | no |
 | <a name="input_gitlab_gcp_wif_service_account_email_variable_name"></a> [gitlab\_gcp\_wif\_service\_account\_email\_variable\_name](#input\_gitlab\_gcp\_wif\_service\_account\_email\_variable\_name) | The name of the GitLab variable to store the GCP WIF service account email. | `string` | `"GCP_WIF_SERVICE_ACCOUNT_EMAIL"` | no |
-| <a name="input_gitlab_group_id"></a> [gitlab\_group\_id](#input\_gitlab\_group\_id) | The GitLab group ID to allow access from. Use this for group-level access. | `number` | `0` | no |
+| <a name="input_gitlab_group_ids"></a> [gitlab\_group\_ids](#input\_gitlab\_group\_ids) | The GitLab group IDs to allow access from. Use this for group-level access. | `list(number)` | `[]` | no |
 | <a name="input_gitlab_instance_url"></a> [gitlab\_instance\_url](#input\_gitlab\_instance\_url) | The URL of your GitLab instance. | `string` | `"https://gitlab.com"` | no |
-| <a name="input_gitlab_project_id"></a> [gitlab\_project\_id](#input\_gitlab\_project\_id) | The GitLab project ID to allow access from. Use this for project-level access. | `number` | `0` | no |
+| <a name="input_gitlab_project_ids"></a> [gitlab\_project\_ids](#input\_gitlab\_project\_ids) | The GitLab project IDs to allow access from. Use this for project-level access. | `list(number)` | `[]` | no |
 | <a name="input_gitlab_variables_additional"></a> [gitlab\_variables\_additional](#input\_gitlab\_variables\_additional) | Additional GitLab variables to create. This should be a map where the key is the variable name and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied. | <pre>map(object({<br/>    value       = string<br/>    protected   = optional(bool, false)<br/>    masked      = optional(bool, false)<br/>    description = optional(string, "Managed by {{MANAGER_NAME}}.")<br/>  }))</pre> | `{}` | no |
 | <a name="input_gitlab_variables_description"></a> [gitlab\_variables\_description](#input\_gitlab\_variables\_description) | The description for the GitLab variables created by this module. You can use `{{MANAGER_NAME}}` to include the name of the 'manager' defined in `gitlab_variables_description_manager_name`. | `string` | `"Managed by {{MANAGER_NAME}}."` | no |
 | <a name="input_gitlab_variables_description_manager_name"></a> [gitlab\_variables\_description\_manager\_name](#input\_gitlab\_variables\_description\_manager\_name) | The name of the manager to include in the GitLab variable description. | `string` | `"terraform-google-gcp-gitlab-wif module"` | no |
@@ -49,7 +49,7 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | Name | Description |
 |------|-------------|
 | <a name="output_gitlab_variables"></a> [gitlab\_variables](#output\_gitlab\_variables) | The GitLab variables created by this module. |
-| <a name="output_principal_set"></a> [principal\_set](#output\_principal\_set) | The principal set string used for IAM bindings. |
+| <a name="output_principal_set"></a> [principal\_set](#output\_principal\_set) | The principal sets string used for IAM bindings. |
 | <a name="output_secret_created"></a> [secret\_created](#output\_secret\_created) | The names and IDs of the secrets created by this module. |
 | <a name="output_secret_ids"></a> [secret\_ids](#output\_secret\_ids) | Map of original secret names to their Secret Manager secret IDs |
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of original secret names to their formatted names |
@@ -80,6 +80,7 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | [google_service_account.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account) | resource |
 | [google_service_account_iam_member.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/service_account_iam_member) | resource |
 | [random_id.suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
+| [gitlab_group.this](https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs/data-sources/group) | data source |
 | [google_project.project](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/project) | data source |
 | [google_service_account.this](https://registry.terraform.io/providers/hashicorp/google/latest/docs/data-sources/service_account) | data source |
 

@@ -1,9 +1,16 @@
+# Fetch  GitLab groups path, if needed
+data "gitlab_group" "this" {
+  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+
+  group_id = tonumber(each.value)
+}
+
 # GitLab group and project variables for Workload Identity Federation
 # Group variables if `var.gitlab_group_id` is provided
 resource "gitlab_group_variable" "gcp_wif_project_id" {
-  count = local.is_gitlab_group_level ? 1 : 0
+  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
-  group       = var.gitlab_group_id
+  group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_project_id_variable_name
   value       = data.google_project.project.number
   description = local.gitlab_variables_description
@@ -12,9 +19,9 @@ resource "gitlab_group_variable" "gcp_wif_project_id" {
 }
 
 resource "gitlab_group_variable" "gcp_wif_pool" {
-  count = local.is_gitlab_group_level ? 1 : 0
+  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
-  group       = var.gitlab_group_id
+  group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_pool_variable_name
   value       = google_iam_workload_identity_pool.this.workload_identity_pool_id
   description = local.gitlab_variables_description
@@ -23,9 +30,9 @@ resource "gitlab_group_variable" "gcp_wif_pool" {
 }
 
 resource "gitlab_group_variable" "gcp_wif_provider" {
-  count = local.is_gitlab_group_level ? 1 : 0
+  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
-  group       = var.gitlab_group_id
+  group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_provider_variable_name
   value       = google_iam_workload_identity_pool_provider.this.workload_identity_pool_provider_id
   description = local.gitlab_variables_description
@@ -34,9 +41,9 @@ resource "gitlab_group_variable" "gcp_wif_provider" {
 }
 
 resource "gitlab_group_variable" "gcp_wif_service_account_email" {
-  count = local.is_gitlab_group_level ? 1 : 0
+  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
-  group       = var.gitlab_group_id
+  group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_service_account_email_variable_name
   value       = local.sa_email
   description = local.gitlab_variables_description
@@ -45,10 +52,12 @@ resource "gitlab_group_variable" "gcp_wif_service_account_email" {
 }
 
 resource "gitlab_group_variable" "gitlab_variables_additional" {
-  for_each = local.is_gitlab_group_level ? local.gitlab_variables_additional_final : {}
+  for_each = length(var.gitlab_group_ids) > 0 ? {
+    for key, val in local.gitlab_variables_additional_final : key => val if val.gitlab_resource_type == local.group_resource_suffix
+  } : {}
 
-  group       = var.gitlab_group_id
-  key         = each.key
+  group       = each.value.gitlab_resource_id
+  key         = each.value.key
   value       = each.value.value
   description = each.value.description
   protected   = each.value.protected
@@ -57,9 +66,9 @@ resource "gitlab_group_variable" "gitlab_variables_additional" {
 
 # Project variables if `var.gitlab_project_id` is provided
 resource "gitlab_project_variable" "gcp_wif_project_id" {
-  count = local.is_gitlab_project_level ? 1 : 0
+  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
-  project     = var.gitlab_project_id
+  project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_project_id_variable_name
   value       = data.google_project.project.number
   description = local.gitlab_variables_description
@@ -68,9 +77,9 @@ resource "gitlab_project_variable" "gcp_wif_project_id" {
 }
 
 resource "gitlab_project_variable" "gcp_wif_pool" {
-  count = local.is_gitlab_project_level ? 1 : 0
+  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
-  project     = var.gitlab_project_id
+  project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_pool_variable_name
   value       = google_iam_workload_identity_pool.this.workload_identity_pool_id
   description = local.gitlab_variables_description
@@ -79,9 +88,9 @@ resource "gitlab_project_variable" "gcp_wif_pool" {
 }
 
 resource "gitlab_project_variable" "gcp_wif_provider" {
-  count = local.is_gitlab_project_level ? 1 : 0
+  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
-  project     = var.gitlab_project_id
+  project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_provider_variable_name
   value       = google_iam_workload_identity_pool_provider.this.workload_identity_pool_provider_id
   description = local.gitlab_variables_description
@@ -90,9 +99,9 @@ resource "gitlab_project_variable" "gcp_wif_provider" {
 }
 
 resource "gitlab_project_variable" "gcp_wif_service_account_email" {
-  count = local.is_gitlab_project_level ? 1 : 0
+  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
-  project     = var.gitlab_project_id
+  project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_service_account_email_variable_name
   value       = local.sa_email
   description = local.gitlab_variables_description
@@ -101,10 +110,12 @@ resource "gitlab_project_variable" "gcp_wif_service_account_email" {
 }
 
 resource "gitlab_project_variable" "gitlab_variables_additional" {
-  for_each = local.is_gitlab_project_level ? local.gitlab_variables_additional_final : {}
+  for_each = length(var.gitlab_project_ids) > 0 ? {
+    for key, val in local.gitlab_variables_additional_final : key => val if val.gitlab_resource_type == local.project_resource_suffix
+  } : {}
 
-  project     = var.gitlab_project_id
-  key         = each.key
+  project     = each.value.gitlab_resource_id
+  key         = each.value.key
   value       = each.value.value
   description = each.value.description
   protected   = each.value.protected

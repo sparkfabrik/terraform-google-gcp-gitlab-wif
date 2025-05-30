@@ -16,13 +16,8 @@ resource "google_iam_workload_identity_pool" "this" {
   lifecycle {
     # Prevent creation of resources if the module is not configured correctly
     precondition {
-      condition     = var.gitlab_group_id > 0 || var.gitlab_project_id > 0
-      error_message = "Either gitlab_group_id or gitlab_project_id must be provided."
-    }
-
-    precondition {
-      condition     = (var.gitlab_group_id > 0) != (var.gitlab_project_id > 0)
-      error_message = "Only one of gitlab_group_id or gitlab_project_id should be provided, not both."
+      condition     = length(var.gitlab_group_ids) > 0 || length(var.gitlab_project_ids) > 0
+      error_message = "Either gitlab_group_ids or gitlab_project_ids must be provided."
     }
   }
 }
@@ -33,8 +28,15 @@ resource "google_iam_workload_identity_pool_provider" "this" {
   workload_identity_pool_provider_id = "provider-${substr(local.resource_name_suffix, 0, 32 - length("provider-"))}"
   display_name                       = local.provider_display_name
   description                        = "OIDC identity pool provider for ${var.name}"
-  attribute_mapping                  = var.gcp_workload_identity_pool_provider_attribute_mapping
   attribute_condition                = local.attribute_condition
+  attribute_mapping = merge(
+    var.gcp_workload_identity_pool_provider_attribute_mapping,
+    length(var.gitlab_group_ids) > 0 ? {
+      "attribute.${local.custom_id_group_valid_attribute_name}" = "${
+        join(" || ", formatlist("assertion.namespace_path.startsWith(\"%s\")", [for item in data.gitlab_group.this : item.full_path]))
+      } ? \"1\" : \"0\"",
+    } : {}
+  )
 
   oidc {
     issuer_uri        = var.gitlab_instance_url
@@ -58,7 +60,9 @@ data "google_service_account" "this" {
 }
 
 resource "google_service_account_iam_member" "this" {
+  for_each = local.principal_sets
+
   service_account_id = local.sa_name
   role               = "roles/iam.workloadIdentityUser"
-  member             = local.principal_set
+  member             = each.value
 }

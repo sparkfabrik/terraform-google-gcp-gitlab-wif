@@ -10,9 +10,10 @@ variable "gcp_project_id" {
 }
 
 # GitLab variables
-variable "gitlab_project_id" {
-  description = "The GitLab project ID to allow access from. Use this for project-level access."
-  type        = string
+variable "gitlab_project_ids" {
+  description = "The GitLab project IDs to allow access from. Use this for project-level access."
+  type        = list(number)
+  default     = []
 }
 
 variable "gitlab_instance_url" {

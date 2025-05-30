@@ -42,25 +42,25 @@ variable "gcp_workload_identity_pool_provider_attribute_mapping" {
 }
 
 # GitLab variables
-variable "gitlab_group_id" {
-  description = "The GitLab group ID to allow access from. Use this for group-level access."
-  type        = number
-  default     = 0
+variable "gitlab_group_ids" {
+  description = "The GitLab group IDs to allow access from. Use this for group-level access."
+  type        = list(number)
+  default     = []
 
   validation {
-    condition     = var.gitlab_group_id >= 0
-    error_message = "gitlab_group_id must be a valid GitLab group ID or 0 for non-set value (everything will be configured for project-level access)."
+    condition     = length(var.gitlab_group_ids) == 0 || alltrue([for id in var.gitlab_group_ids : id > 0])
+    error_message = "gitlab_group_ids must be a valid list of GitLab group IDs or an empty list for non-set value (everything will be configured for project-level access)."
   }
 }
 
-variable "gitlab_project_id" {
-  description = "The GitLab project ID to allow access from. Use this for project-level access."
-  type        = number
-  default     = 0
+variable "gitlab_project_ids" {
+  description = "The GitLab project IDs to allow access from. Use this for project-level access."
+  type        = list(number)
+  default     = []
 
   validation {
-    condition     = var.gitlab_project_id >= 0
-    error_message = "gitlab_project_id must be a valid GitLab project ID or 0 for non-set value (everything will be configured for group-level access)."
+    condition     = length(var.gitlab_project_ids) == 0 || alltrue([for id in var.gitlab_project_ids : id > 0])
+    error_message = "gitlab_project_ids must be a valid list of GitLab project IDs or an empty list for non-set value (everything will be configured for group-level access)."
   }
 }
 
