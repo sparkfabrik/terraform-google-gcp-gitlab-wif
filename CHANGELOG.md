@@ -10,6 +10,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.6.0] - 2025-09-24
 
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.5.0...0.6.0)
+
 - Remove useless `gcp_existing_service_account_project_id` variable, as the project ID is optional in the `google_service_account` data source.
 
 ## [0.5.0] - 2025-05-30
