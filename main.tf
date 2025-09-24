@@ -55,7 +55,6 @@ resource "google_service_account" "this" {
 data "google_service_account" "this" {
   count = var.gcp_existing_service_account_account_id != null ? 1 : 0
 
-  project    = var.gcp_existing_service_account_project_id
   account_id = var.gcp_existing_service_account_account_id
 }
 

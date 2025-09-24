@@ -9,12 +9,6 @@ variable "gcp_project_id" {
   type        = string
 }
 
-variable "gcp_existing_service_account_project_id" {
-  description = "The project ID of the existing service account to use for GitLab WIF."
-  type        = string
-  default     = null
-}
-
 variable "gcp_existing_service_account_account_id" {
   description = "The email of an existing service account to use for GitLab WIF."
   type        = string
