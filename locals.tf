@@ -27,7 +27,7 @@ locals {
   account_id        = "${local.sa_name_prefix}${local.sa_name_truncated}"
 
   # Manage conditionally creation of the service account
-  sa_must_be_created = var.gcp_existing_service_account_account_id == null && var.gcp_existing_service_account_project_id == null
+  sa_must_be_created = var.gcp_existing_service_account_account_id == null
   sa_name            = local.sa_must_be_created ? resource.google_service_account.this[0].name : data.google_service_account.this[0].name
   sa_email           = local.sa_must_be_created ? resource.google_service_account.this[0].email : data.google_service_account.this[0].email
   sa_member          = local.sa_must_be_created ? resource.google_service_account.this[0].member : data.google_service_account.this[0].member
