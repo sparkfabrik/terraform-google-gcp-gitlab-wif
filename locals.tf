@@ -23,7 +23,7 @@ locals {
     },
     # If no specific projects or groups are defined, allow the entire GitLab instance.
     length(var.gitlab_group_ids) == 0 && length(var.gitlab_project_ids) == 0 ? {
-      "instance-wide" = "//iam.googleapis.com/${google_iam_workload_identity_pool.this.name}"
+      "instance-wide" = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/*"
     } : {},
   )
 
