@@ -16,9 +16,16 @@ locals {
     length(var.gitlab_project_ids) > 0 ? { for id in var.gitlab_project_ids : "${local.project_resource_suffix}-${id}" => "attribute.project_id/${id}" } : {},
     length(var.gitlab_group_ids) > 0 ? { (local.group_resource_suffix) = "attribute.${local.custom_id_group_valid_attribute_name}/1" } : {},
   )
-  principal_sets = {
-    for key, subject in local.principal_subjects : key => "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${subject}"
-  }
+  principals = merge(
+    # Build the principalSet for each project and group.
+    {
+      for key, subject in local.principal_subjects : key => "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${subject}"
+    },
+    # If no specific projects or groups are defined, allow the entire GitLab instance.
+    length(var.gitlab_group_ids) == 0 && length(var.gitlab_project_ids) == 0 ? {
+      "instance-wide" = "//iam.googleapis.com/${google_iam_workload_identity_pool.this.name}"
+    } : {},
+  )
 
   # Ensure the account_id is always 28 characters or less
   sa_name_prefix    = "gwif-sa-"

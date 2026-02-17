@@ -13,6 +13,7 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.6.0...0.7.0)
 
 - Allow empty lists for `gitlab_group_ids` **and** `gitlab_project_ids` variables to create a Workload Identity Pool that allows access from the entire GitLab instance. **Pay attention**: if both `gitlab_group_ids` and `gitlab_project_ids` are empty, the module will not create any GitLab variables. You can use the `gitlab_variables` output to configure the necessary variables in your GitLab instance.
+- Rename the output `principal_set` to `principals` to better reflect its content, which includes both principal sets for specific groups and projects as well as an instance-wide principal if no specific groups or projects are defined.
 
 ## [0.6.0] - 2025-09-24
 

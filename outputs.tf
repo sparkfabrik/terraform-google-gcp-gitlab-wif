@@ -13,9 +13,9 @@ output "service_account_email" {
   value       = local.sa_email
 }
 
-output "principal_set" {
-  description = "The principal sets string used for IAM bindings."
-  value       = local.principal_sets
+output "principals" {
+  description = "The principals string used for IAM bindings."
+  value       = local.principals
 }
 
 # GitLab variables outputs

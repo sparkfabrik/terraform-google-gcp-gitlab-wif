@@ -48,7 +48,7 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | Name | Description |
 |------|-------------|
 | <a name="output_gitlab_variables"></a> [gitlab\_variables](#output\_gitlab\_variables) | The GitLab variables created by this module. |
-| <a name="output_principal_set"></a> [principal\_set](#output\_principal\_set) | The principal sets string used for IAM bindings. |
+| <a name="output_principals"></a> [principals](#output\_principals) | The principals string used for IAM bindings. |
 | <a name="output_secret_created"></a> [secret\_created](#output\_secret\_created) | The names and IDs of the secrets created by this module. |
 | <a name="output_secret_ids"></a> [secret\_ids](#output\_secret\_ids) | Map of original secret names to their Secret Manager secret IDs |
 | <a name="output_secret_names"></a> [secret\_names](#output\_secret\_names) | Map of original secret names to their formatted names |

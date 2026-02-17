@@ -51,7 +51,7 @@ data "google_service_account" "this" {
 }
 
 resource "google_service_account_iam_member" "this" {
-  for_each = local.principal_sets
+  for_each = local.principals
 
   service_account_id = local.sa_name
   role               = "roles/iam.workloadIdentityUser"
