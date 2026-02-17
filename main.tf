@@ -12,14 +12,6 @@ resource "google_iam_workload_identity_pool" "this" {
   workload_identity_pool_id = "pool-${substr(local.resource_name_suffix, 0, 32 - length("pool-"))}"
   display_name              = local.pool_display_name
   description               = "Identity pool for ${var.name}"
-
-  lifecycle {
-    # Prevent creation of resources if the module is not configured correctly
-    precondition {
-      condition     = length(var.gitlab_group_ids) > 0 || length(var.gitlab_project_ids) > 0
-      error_message = "Either gitlab_group_ids or gitlab_project_ids must be provided."
-    }
-  }
 }
 
 resource "google_iam_workload_identity_pool_provider" "this" {
