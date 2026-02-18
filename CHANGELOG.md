@@ -8,6 +8,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-02-18
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.7.0...0.8.0)
+
+- Add `gitlab_gcp_wif_variables_enabled` variable to allow users to enable or disable the creation of GitLab variables for the GCP WIF configuration.
+
 ## [0.7.0] - 2026-02-17
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.6.0...0.7.0)

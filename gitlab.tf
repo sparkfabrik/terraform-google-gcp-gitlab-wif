@@ -1,6 +1,6 @@
 # Fetch  GitLab groups path, if needed
 data "gitlab_group" "this" {
-  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+  for_each = local.gitlab_group_variables_enabled ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
   group_id = tonumber(each.value)
 }
@@ -8,7 +8,7 @@ data "gitlab_group" "this" {
 # GitLab group and project variables for Workload Identity Federation
 # Group variables if `var.gitlab_group_id` is provided
 resource "gitlab_group_variable" "gcp_wif_project_id" {
-  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+  for_each = local.gitlab_group_variables_enabled ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
   group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_project_id_variable_name
@@ -19,7 +19,7 @@ resource "gitlab_group_variable" "gcp_wif_project_id" {
 }
 
 resource "gitlab_group_variable" "gcp_wif_pool" {
-  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+  for_each = local.gitlab_group_variables_enabled ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
   group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_pool_variable_name
@@ -30,7 +30,7 @@ resource "gitlab_group_variable" "gcp_wif_pool" {
 }
 
 resource "gitlab_group_variable" "gcp_wif_provider" {
-  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+  for_each = local.gitlab_group_variables_enabled ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
   group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_provider_variable_name
@@ -41,7 +41,7 @@ resource "gitlab_group_variable" "gcp_wif_provider" {
 }
 
 resource "gitlab_group_variable" "gcp_wif_service_account_email" {
-  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+  for_each = local.gitlab_group_variables_enabled ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
   group       = tonumber(each.value)
   key         = var.gitlab_gcp_wif_service_account_email_variable_name
@@ -52,7 +52,7 @@ resource "gitlab_group_variable" "gcp_wif_service_account_email" {
 }
 
 resource "gitlab_group_variable" "gitlab_variables_additional" {
-  for_each = length(var.gitlab_group_ids) > 0 ? {
+  for_each = local.gitlab_group_variables_enabled ? {
     for key, val in local.gitlab_variables_additional_final : key => val if val.gitlab_resource_type == local.group_resource_suffix
   } : {}
 
@@ -66,7 +66,7 @@ resource "gitlab_group_variable" "gitlab_variables_additional" {
 
 # Project variables if `var.gitlab_project_id` is provided
 resource "gitlab_project_variable" "gcp_wif_project_id" {
-  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
+  for_each = local.gitlab_project_variables_enabled ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
   project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_project_id_variable_name
@@ -77,7 +77,7 @@ resource "gitlab_project_variable" "gcp_wif_project_id" {
 }
 
 resource "gitlab_project_variable" "gcp_wif_pool" {
-  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
+  for_each = local.gitlab_project_variables_enabled ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
   project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_pool_variable_name
@@ -88,7 +88,7 @@ resource "gitlab_project_variable" "gcp_wif_pool" {
 }
 
 resource "gitlab_project_variable" "gcp_wif_provider" {
-  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
+  for_each = local.gitlab_project_variables_enabled ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
   project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_provider_variable_name
@@ -99,7 +99,7 @@ resource "gitlab_project_variable" "gcp_wif_provider" {
 }
 
 resource "gitlab_project_variable" "gcp_wif_service_account_email" {
-  for_each = length(var.gitlab_project_ids) > 0 ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
+  for_each = local.gitlab_project_variables_enabled ? toset([for id in var.gitlab_project_ids : tostring(id)]) : []
 
   project     = tonumber(each.value)
   key         = var.gitlab_gcp_wif_service_account_email_variable_name
@@ -110,7 +110,7 @@ resource "gitlab_project_variable" "gcp_wif_service_account_email" {
 }
 
 resource "gitlab_project_variable" "gitlab_variables_additional" {
-  for_each = length(var.gitlab_project_ids) > 0 ? {
+  for_each = local.gitlab_project_variables_enabled ? {
     for key, val in local.gitlab_variables_additional_final : key => val if val.gitlab_resource_type == local.project_resource_suffix
   } : {}
 

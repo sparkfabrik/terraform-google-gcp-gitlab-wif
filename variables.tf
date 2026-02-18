@@ -64,6 +64,12 @@ variable "gitlab_instance_url" {
   default     = "https://gitlab.com"
 }
 
+variable "gitlab_gcp_wif_variables_enabled" {
+  description = "Whether to create GitLab variables for the GCP WIF configuration. If true, the module will create variables for the GCP project ID, WIF pool name, provider name, and service account email. These variables can then be used in your GitLab CI/CD pipelines to authenticate with GCP using Workload Identity Federation."
+  type        = bool
+  default     = true
+}
+
 variable "gitlab_gcp_wif_project_id_variable_name" {
   description = "The name of the GitLab variable to store the GCP project ID for WIF."
   type        = string
