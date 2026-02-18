@@ -23,9 +23,9 @@ output "gitlab_variables" {
   description = "The GitLab variables created by this module."
   value = merge(
     {
-      (var.gitlab_gcp_wif_project_id_variable_name)            = var.gcp_project_id
-      (var.gitlab_gcp_wif_pool_variable_name)                  = google_iam_workload_identity_pool.this.name
-      (var.gitlab_gcp_wif_provider_variable_name)              = google_iam_workload_identity_pool_provider.this.name
+      (var.gitlab_gcp_wif_project_id_variable_name)            = data.google_project.project.number
+      (var.gitlab_gcp_wif_pool_variable_name)                  = google_iam_workload_identity_pool.this.workload_identity_pool_id
+      (var.gitlab_gcp_wif_provider_variable_name)              = google_iam_workload_identity_pool_provider.this.workload_identity_pool_provider_id
       (var.gitlab_gcp_wif_service_account_email_variable_name) = local.sa_email
     },
     length(var.gitlab_variables_additional) > 0 ? {
