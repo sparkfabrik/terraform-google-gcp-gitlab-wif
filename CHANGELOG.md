@@ -8,6 +8,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-02-18
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.8.0...0.8.1)
+
+- Fix the output `gitlab_variables` to use consistent values.
+
 ## [0.8.0] - 2026-02-18
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.7.0...0.8.0)
