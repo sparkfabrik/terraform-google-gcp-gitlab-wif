@@ -1,6 +1,6 @@
 # Fetch  GitLab groups path, if needed
 data "gitlab_group" "this" {
-  for_each = local.gitlab_group_variables_enabled ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
+  for_each = length(var.gitlab_group_ids) > 0 ? toset([for id in var.gitlab_group_ids : tostring(id)]) : []
 
   group_id = tonumber(each.value)
 }
