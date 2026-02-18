@@ -63,6 +63,9 @@ locals {
 
   secret_gcp_project_id = var.secret_gcp_project_id != null ? var.secret_gcp_project_id : var.gcp_project_id
 
+  gitlab_group_variables_enabled   = var.gitlab_gcp_wif_variables_enabled && length(var.gitlab_group_ids) > 0
+  gitlab_project_variables_enabled = var.gitlab_gcp_wif_variables_enabled && length(var.gitlab_project_ids) > 0
+
   gitlab_variables_description = replace(var.gitlab_variables_description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
 
   gitlab_variables_additional_group = flatten([
@@ -79,6 +82,7 @@ locals {
         )
       ]
   ]])
+
   gitlab_variables_additional_project = flatten([
     for gitlab_resource_id in var.gitlab_project_ids : [
       for key, value in var.gitlab_variables_additional : [
@@ -93,6 +97,7 @@ locals {
         )
       ]
   ]])
+
   gitlab_variables_additional_final = {
     for item in concat(local.gitlab_variables_additional_group, local.gitlab_variables_additional_project) :
     "${item.key}--${item.gitlab_resource_type}--${item.gitlab_resource_id}" => item
