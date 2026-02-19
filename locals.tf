@@ -12,17 +12,22 @@ locals {
     length(var.gitlab_group_ids) > 0 ? [local.groups_attribute_condition] : []
   ))
 
+  final_gitlab_group_full_paths = concat(
+    [for item in data.gitlab_group.this : item.full_path],
+    var.gitlab_group_static_full_paths
+  )
+
   principal_subjects = merge(
     length(var.gitlab_project_ids) > 0 ? { for id in var.gitlab_project_ids : "${local.project_resource_suffix}-${id}" => "attribute.project_id/${id}" } : {},
-    length(var.gitlab_group_ids) > 0 ? { (local.group_resource_suffix) = "attribute.${local.custom_id_group_valid_attribute_name}/1" } : {},
+    length(local.final_gitlab_group_full_paths) > 0 ? { (local.group_resource_suffix) = "attribute.${local.custom_id_group_valid_attribute_name}/1" } : {},
   )
   principals = merge(
     # Build the principalSet for each project and group.
     {
       for key, subject in local.principal_subjects : key => "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${subject}"
     },
-    # If no specific projects or groups are defined, allow the entire GitLab instance.
-    length(var.gitlab_group_ids) == 0 && length(var.gitlab_project_ids) == 0 ? {
+    # If no specific projects or groups or static paths are defined, allow the entire GitLab instance.
+    length(var.gitlab_group_ids) == 0 && length(var.gitlab_group_static_full_paths) == 0 && length(var.gitlab_project_ids) == 0 ? {
       "instance-wide" = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/*"
     } : {},
   )
