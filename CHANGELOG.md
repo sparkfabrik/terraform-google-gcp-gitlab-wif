@@ -8,6 +8,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-02-19
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.8.1...0.9.0)
+
+- Add `gitlab_group_static_full_paths` variable to allow users to specify static GitLab group paths for access control without querying the GitLab API. The list of group paths provided in `gitlab_group_static_full_paths` will be merged with the group paths obtained from `gitlab_group_ids` (if any) to create the final attribute condition for group access.
+
 ## [0.8.1] - 2026-02-18
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.8.0...0.8.1)

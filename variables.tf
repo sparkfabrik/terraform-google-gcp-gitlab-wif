@@ -47,6 +47,12 @@ variable "gitlab_group_ids" {
   }
 }
 
+variable "gitlab_group_static_full_paths" {
+  description = "The GitLab group paths to allow access from. This is used in the attribute condition for group access statically instead of dynamically querying the GitLab API. It is useful when you don't have access to the GitLab instance. The paths should be in the format `root_namespace/subgroup1/subgroup2`. If both gitlab_group_ids and gitlab_group_static_full_paths are provided, the module will merge the conditions to allow access from both the specified group IDs and the static paths."
+  type        = list(string)
+  default     = []
+}
+
 variable "gitlab_project_ids" {
   description = "The GitLab project IDs to allow access from. Use this for project-level access. If both gitlab_group_ids and gitlab_project_ids are not provided, the module will create a Workload Identity Pool that allows access from the entire GitLab instance."
   type        = list(number)
