@@ -8,6 +8,15 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-05-13
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.9.0...0.9.1)
+
+### Fixed
+
+- Fix group path matching in CEL expression to prevent unintended access from groups sharing a common prefix (e.g., `my-group-other` matching when only `my-group` was intended). The expression now uses both `startsWith("path/")` and exact match (`== "path"`) to correctly scope access to the intended group and its subgroups.
+- Fix `attribute_condition` to include `groups_attribute_condition` when `gitlab_group_static_full_paths` is used without `gitlab_group_ids`.
+
 ## [0.9.0] - 2026-02-19
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.8.1...0.9.0)
