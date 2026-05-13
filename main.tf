@@ -23,9 +23,9 @@ resource "google_iam_workload_identity_pool_provider" "this" {
   attribute_condition                = local.attribute_condition
   attribute_mapping = merge(
     var.gcp_workload_identity_pool_provider_attribute_mapping,
-    length(local.final_gitlab_group_full_paths) > 0 ? {
+    length(local.gitlab_group_cel_conditions) > 0 ? {
       "attribute.${local.custom_id_group_valid_attribute_name}" = "${
-        join(" || ", formatlist("assertion.namespace_path.startsWith(\"%s\")", local.final_gitlab_group_full_paths))
+        join(" || ", local.gitlab_group_cel_conditions)
       } ? \"1\" : \"0\"",
     } : {}
   )

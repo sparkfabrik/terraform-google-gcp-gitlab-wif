@@ -9,13 +9,25 @@ locals {
   groups_attribute_condition   = "(attribute.${local.custom_id_group_valid_attribute_name}==\"1\")"
   attribute_condition = join(" || ", concat(
     length(var.gitlab_project_ids) > 0 ? [local.projects_attribute_condition] : [],
-    length(var.gitlab_group_ids) > 0 ? [local.groups_attribute_condition] : []
+    length(var.gitlab_group_ids) > 0 || length(var.gitlab_group_static_full_paths) > 0 ? [local.groups_attribute_condition] : []
   ))
 
   final_gitlab_group_full_paths = concat(
     [for item in data.gitlab_group.this : item.full_path],
     var.gitlab_group_static_full_paths
   )
+
+  # Normalize: strip trailing slash if present, so we can build consistent CEL conditions.
+  normalized_gitlab_group_full_paths = [
+    for path in local.final_gitlab_group_full_paths :
+    trimsuffix(path, "/")
+  ]
+
+  # Each group needs: exact match (direct projects) OR startsWith with trailing slash (subgroups).
+  gitlab_group_cel_conditions = [
+    for path in local.normalized_gitlab_group_full_paths :
+    "(assertion.namespace_path.startsWith(\"${path}/\") || assertion.namespace_path == \"${path}\")"
+  ]
 
   principal_subjects = merge(
     length(var.gitlab_project_ids) > 0 ? { for id in var.gitlab_project_ids : "${local.project_resource_suffix}-${id}" => "attribute.project_id/${id}" } : {},
