@@ -51,8 +51,16 @@ locals {
   sa_name_truncated = substr(local.resource_name_suffix, 0, local.sa_name_max_len)
   account_id        = "${local.sa_name_prefix}${local.sa_name_truncated}"
 
+  # Service account mode selection
+  sa_use_existing = var.gcp_existing_service_account_account_id != null
+  sa_use_explicit = var.gcp_service_account_account_id != null && var.gcp_service_account_project_id != null
+
+  # Determine the project and account_id for module-managed creation
+  sa_project_id = local.sa_use_explicit ? var.gcp_service_account_project_id : var.gcp_project_id
+  sa_account_id = local.sa_use_explicit ? var.gcp_service_account_account_id : local.account_id
+
   # Manage conditionally creation of the service account
-  sa_must_be_created = var.gcp_existing_service_account_account_id == null
+  sa_must_be_created = !local.sa_use_existing
   sa_name            = local.sa_must_be_created ? resource.google_service_account.this[0].name : data.google_service_account.this[0].name
   sa_email           = local.sa_must_be_created ? resource.google_service_account.this[0].email : data.google_service_account.this[0].email
   sa_member          = local.sa_must_be_created ? resource.google_service_account.this[0].member : data.google_service_account.this[0].member
