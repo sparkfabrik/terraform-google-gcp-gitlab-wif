@@ -8,6 +8,22 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-05-20
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.9.1...1.0.0)
+
+### :warning: Breaking change
+
+The workload identity pool and provider IDs now place the random hex suffix at the **beginning** of the identifier (e.g., `pool-a1b2c3d4-myname` instead of `pool-myname-a1b2c3d4`). This prevents the random part from being truncated when `var.name` is long, which could cause ID collisions.
+
+**Upgrading will destroy and recreate the pool, provider, their module-managed IAM binding (`workloadIdentityUser`), and the related GitLab CI/CD variables.** These are pure configuration resources (identity federation settings), no data loss is involved. The service account itself and any IAM roles granted to it on other GCP resources are **not affected**.
+
+See [UPGRADING.md](UPGRADING.md) for details.
+
+### Changed
+
+- Move random hex prefix before `var.name` in pool and provider IDs to avoid collisions caused by truncation.
+
 ## [0.9.1] - 2026-05-13
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/0.9.0...0.9.1)
