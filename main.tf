@@ -55,6 +55,7 @@ data "google_service_account" "this" {
   count = local.sa_use_existing ? 1 : 0
 
   account_id = var.gcp_existing_service_account_account_id
+  project    = var.gcp_project_id
 
   lifecycle {
     precondition {

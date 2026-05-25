@@ -10,7 +10,7 @@ variable "gcp_project_id" {
 }
 
 variable "gcp_existing_service_account_account_id" {
-  description = "The account ID of an existing service account to reuse for GitLab WIF. This is the short identifier (e.g., `my-service-account`), not the full email address. Mutually exclusive with `gcp_service_account_account_id` and `gcp_service_account_project_id`."
+  description = "The account ID of an existing service account to reuse for GitLab WIF. This is the short identifier (e.g., `my-service-account`), not the full email address. The service account is looked up in the project specified by `gcp_project_id`. Mutually exclusive with `gcp_service_account_account_id` and `gcp_service_account_project_id`."
   type        = string
   default     = null
 }

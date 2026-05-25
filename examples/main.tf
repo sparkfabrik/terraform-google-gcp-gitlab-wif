@@ -2,8 +2,7 @@
    # A simple example on how to use this module with explicit service account creation
  */
 module "example" {
-  source  = "github.com/sparkfabrik/terraform-google-gcp-gitlab-wif?ref=main"
-  version = ">= 0.1.0"
+  source = "github.com/sparkfabrik/terraform-google-gcp-gitlab-wif?ref=main"
 
   name                           = var.name
   gcp_project_id                 = var.gcp_project_id
