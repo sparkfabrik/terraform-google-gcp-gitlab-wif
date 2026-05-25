@@ -41,6 +41,8 @@ variable "gcp_workload_identity_pool_provider_attribute_mapping" {
     "attribute.project_id"           = "assertion.project_id"
     "attribute.namespace_id"         = "assertion.namespace_id"
     "attribute.user_email"           = "assertion.user_email"
+    "attribute.user_id"              = "assertion.user_id"
+    "attribute.user_login"           = "assertion.user_login"
     "attribute.ref"                  = "assertion.ref"
     "attribute.ref_type"             = "assertion.ref_type"
     "attribute.custom_assertion_sub" = "assertion.sub"
@@ -78,6 +80,39 @@ variable "gitlab_project_ids" {
   validation {
     condition     = length(var.gitlab_project_ids) == 0 || alltrue([for id in var.gitlab_project_ids : id > 0])
     error_message = "gitlab_project_ids must be a valid list of GitLab project IDs or an empty list for non-set value."
+  }
+}
+
+variable "gitlab_user_logins" {
+  description = "The GitLab user logins (usernames) allowed to trigger pipelines that authenticate via WIF. Logins are resolved to immutable numeric user IDs at plan time via the GitLab API (data.gitlab_user), and the WIF attribute condition matches on `attribute.user_id` (mapped from `assertion.user_id` by default). This prevents access from being silently transferred if a username is renamed or freed and reclaimed by another user. Use gitlab_user_ids instead (or in addition) if you don't have access to the GitLab API or already know the numeric IDs; when both variables are set, the resulting ID set is the union of resolved logins and direct IDs. How the user filter combines with project/group filters is controlled by gitlab_user_filter_logic (`and` restricts source filters to these users, `or` lets these users authenticate in addition to the project/group filters). A per-user principalSet (`attribute.user_id/<id>`) is emitted for each matching user, so IAM bindings self-document the user gate."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.gitlab_user_logins) == 0 || alltrue([for login in var.gitlab_user_logins : length(login) > 0 && login == trimspace(login)])
+    error_message = "gitlab_user_logins must be a list of GitLab usernames with no leading or trailing whitespace, or an empty list."
+  }
+}
+
+variable "gitlab_user_ids" {
+  description = "The GitLab numeric user IDs allowed to trigger pipelines that authenticate via WIF. This is the static counterpart to gitlab_user_logins: it skips the GitLab API lookup and is useful when you don't have access to the GitLab instance or already know the IDs. IDs are immutable for the lifetime of a user, so this is the most stable way to identify users. When both gitlab_user_ids and gitlab_user_logins are set, the resulting ID set is the union of direct IDs and resolved logins. How the user filter combines with project/group filters is controlled by gitlab_user_filter_logic. A per-user principalSet (`attribute.user_id/<id>`) is emitted for each matching user."
+  type        = list(number)
+  default     = []
+
+  validation {
+    condition     = length(var.gitlab_user_ids) == 0 || alltrue([for id in var.gitlab_user_ids : id > 0 && floor(id) == id])
+    error_message = "gitlab_user_ids must be a list of positive integer GitLab user IDs or an empty list."
+  }
+}
+
+variable "gitlab_user_filter_logic" {
+  description = "How the user filter combines with project/group filters in the WIF attribute condition. `and` (default): the user filter restricts who can authenticate via the project/group sources (a token must match a source filter AND a user). `or`: the user filter is an additional auth path (a token authenticates if it matches a source filter OR a user), useful for trusted-user bypass (e.g., admins who can authenticate from any project/group). Has no effect when no user filter is set, or when no project/group filter is set."
+  type        = string
+  default     = "and"
+
+  validation {
+    condition     = contains(["and", "or"], lower(var.gitlab_user_filter_logic))
+    error_message = "gitlab_user_filter_logic must be either \"and\" or \"or\" (case-insensitive)."
   }
 }
 

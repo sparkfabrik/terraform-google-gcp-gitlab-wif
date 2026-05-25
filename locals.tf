@@ -6,12 +6,40 @@ locals {
   group_resource_suffix                = "group"
   custom_id_group_valid_attribute_name = "custom_is_group_valid"
 
+  has_group_filters   = length(var.gitlab_group_ids) > 0 || length(var.gitlab_group_static_full_paths) > 0
+  has_user_filters    = length(var.gitlab_user_logins) > 0 || length(var.gitlab_user_ids) > 0
+  has_projects_filter = length(var.gitlab_project_ids) > 0
+  has_any_source      = local.has_group_filters || local.has_projects_filter
+  user_filter_is_or   = lower(var.gitlab_user_filter_logic) == "or"
+
+  # Union of numeric user IDs: those resolved from logins and those supplied directly.
+  resolved_gitlab_user_ids = distinct(concat(
+    [for login in distinct(var.gitlab_user_logins) : tostring(data.gitlab_user.this[login].id)],
+    [for id in var.gitlab_user_ids : tostring(id)],
+  ))
+
   projects_attribute_condition = "(${join(" || ", [for id in var.gitlab_project_ids : "attribute.project_id==\"${id}\""])})"
   groups_attribute_condition   = "(attribute.${local.custom_id_group_valid_attribute_name}==\"1\")"
-  attribute_condition = join(" || ", concat(
-    length(var.gitlab_project_ids) > 0 ? [local.projects_attribute_condition] : [],
-    length(var.gitlab_group_ids) > 0 || length(var.gitlab_group_static_full_paths) > 0 ? [local.groups_attribute_condition] : []
-  ))
+  users_attribute_condition    = "(${join(" || ", [for id in local.resolved_gitlab_user_ids : "attribute.user_id==\"${id}\""])})"
+
+  # Source condition: projects OR groups. Defines WHERE pipelines can come from.
+  source_attribute_condition = join(" || ", compact([
+    local.has_projects_filter ? local.projects_attribute_condition : "",
+    local.has_group_filters ? local.groups_attribute_condition : "",
+  ]))
+
+  # Final attribute_condition.
+  # - No user filter: just the source condition.
+  # - User filter + no source: just the user condition (only users allowed).
+  # - User filter + source + logic=and: source AND user (restrict who from those sources).
+  # - User filter + source + logic=or:  source OR  user (trusted-user bypass).
+  attribute_condition = local.has_user_filters ? (
+    local.has_any_source ? (
+      local.user_filter_is_or
+      ? "(${local.source_attribute_condition}) || ${local.users_attribute_condition}"
+      : "(${local.source_attribute_condition}) && ${local.users_attribute_condition}"
+    ) : local.users_attribute_condition
+  ) : local.source_attribute_condition
 
   final_gitlab_group_full_paths = concat(
     [for item in data.gitlab_group.this : item.full_path],
@@ -31,16 +59,20 @@ locals {
   ]
 
   principal_subjects = merge(
-    length(var.gitlab_project_ids) > 0 ? { for id in var.gitlab_project_ids : "${local.project_resource_suffix}-${id}" => "attribute.project_id/${id}" } : {},
+    local.has_projects_filter ? { for id in var.gitlab_project_ids : "${local.project_resource_suffix}-${id}" => "attribute.project_id/${id}" } : {},
     length(local.final_gitlab_group_full_paths) > 0 ? { (local.group_resource_suffix) = "attribute.${local.custom_id_group_valid_attribute_name}/1" } : {},
+    # Per-user principalSets are always emitted when a user filter is set, so the
+    # IAM binding member string self-documents the user gate (in `and` mode it
+    # complements the source principalSets; in `or` mode it stands alone).
+    local.has_user_filters ? { for id in local.resolved_gitlab_user_ids : "user-${id}" => "attribute.user_id/${id}" } : {},
   )
   principals = merge(
-    # Build the principalSet for each project and group.
+    # Build the principalSet for each project, group, and user.
     {
       for key, subject in local.principal_subjects : key => "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/${subject}"
     },
-    # If no specific projects or groups or static paths are defined, allow the entire GitLab instance.
-    length(var.gitlab_group_ids) == 0 && length(var.gitlab_group_static_full_paths) == 0 && length(var.gitlab_project_ids) == 0 ? {
+    # If no specific projects, groups, static paths, or users are defined, allow the entire GitLab instance.
+    !local.has_any_source && !local.has_user_filters ? {
       "instance-wide" = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/*"
     } : {},
   )

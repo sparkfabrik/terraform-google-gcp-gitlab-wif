@@ -24,15 +24,20 @@ resource "google_iam_workload_identity_pool_provider" "this" {
   attribute_mapping = merge(
     var.gcp_workload_identity_pool_provider_attribute_mapping,
     length(local.gitlab_group_cel_conditions) > 0 ? {
-      "attribute.${local.custom_id_group_valid_attribute_name}" = "${
-        join(" || ", local.gitlab_group_cel_conditions)
-      } ? \"1\" : \"0\"",
+      "attribute.${local.custom_id_group_valid_attribute_name}" = "${join(" || ", local.gitlab_group_cel_conditions)} ? \"1\" : \"0\""
     } : {}
   )
 
   oidc {
     issuer_uri        = var.gitlab_instance_url
     allowed_audiences = [var.gitlab_instance_url]
+  }
+
+  lifecycle {
+    precondition {
+      condition     = (length(var.gitlab_user_logins) == 0 && length(var.gitlab_user_ids) == 0) || (contains(keys(var.gcp_workload_identity_pool_provider_attribute_mapping), "attribute.user_id") && length(trimspace(lookup(var.gcp_workload_identity_pool_provider_attribute_mapping, "attribute.user_id", ""))) > 0)
+      error_message = "When gitlab_user_logins or gitlab_user_ids is set, gcp_workload_identity_pool_provider_attribute_mapping must include a non-empty 'attribute.user_id' mapping (logins are resolved to immutable IDs)."
+    }
   }
 }
 

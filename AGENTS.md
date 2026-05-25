@@ -23,7 +23,7 @@ make generate-docs    # Lint + regenerate README.md (via terraform-docs)
 
 - **Local development.** No Docker required for daily work. `terraform` CLI runs directly. Docker is used only for linting (`tflint`) and doc generation (`terraform-docs`) via `make` targets.
 - **Makefile** is the task runner. Run `make` targets, not raw Docker commands.
-- **README.md is auto-generated.** The section between `<!-- BEGIN_TF_DOCS -->` and `<!-- END_TF_DOCS -->` is produced by `make generate-docs`. Never edit it by hand. After any change to variables, outputs, or resources, run `make generate-docs` to update README.md.
+- **README.md is auto-generated.** The section between `<!-- BEGIN_TF_DOCS -->` and `<!-- END_TF_DOCS -->` is produced by `make generate-docs`. Never edit anything inside that block by hand. Manual edits are allowed only outside the markers (e.g., the intro paragraphs). After any change to variables, outputs, resources, or providers, ALWAYS run `make generate-docs` to regenerate the block. After regeneration, the resulting markdown must be formatted. To change a description, fix the source (variable `description`, terraform-docs config, etc.) and regenerate, do not patch the generated table directly.
 - **CHANGELOG.md must be updated on every change.** Add entries under the `## [Unreleased]` section. Only create a new versioned section (e.g., `## [x.y.z] - YYYY-MM-DD`) when the user explicitly asks to cut a release. Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
 - **Markdown formatting.** After creating or editing any `.md` file, always run the formatter. Do not format markdown by hand.
 - **Examples** live in `examples/`. `examples/test.tfvars` is used by tflint and tfsec for validation.

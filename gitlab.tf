@@ -5,6 +5,15 @@ data "gitlab_group" "this" {
   group_id = tonumber(each.value)
 }
 
+# Resolve GitLab user logins to immutable numeric user IDs.
+# IDs (not logins) are used in the WIF attribute condition so access cannot be
+# transferred by renaming or reclaiming a username.
+data "gitlab_user" "this" {
+  for_each = toset(var.gitlab_user_logins)
+
+  username = each.value
+}
+
 # GitLab group and project variables for Workload Identity Federation
 # Group variables if `var.gitlab_group_id` is provided
 resource "gitlab_group_variable" "gcp_wif_project_id" {
