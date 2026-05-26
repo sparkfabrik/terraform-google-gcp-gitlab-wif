@@ -55,9 +55,16 @@ locals {
   sa_use_existing = var.gcp_existing_service_account_account_id != null
   sa_use_explicit = var.gcp_service_account_account_id != null && var.gcp_service_account_project_id != null
 
-  # Determine the project and account_id for module-managed creation
-  sa_project_id = local.sa_use_explicit ? var.gcp_service_account_project_id : var.gcp_project_id
-  sa_account_id = local.sa_use_explicit ? var.gcp_service_account_account_id : local.account_id
+  # Unified SA identity — resolves to the correct value in all 3 modes
+  sa_account_id = (
+    local.sa_use_existing ? var.gcp_existing_service_account_account_id :
+    local.sa_use_explicit ? var.gcp_service_account_account_id :
+    local.account_id
+  )
+  sa_project_id = (
+    local.sa_use_explicit ? var.gcp_service_account_project_id :
+    var.gcp_project_id
+  )
 
   # Manage conditionally creation of the service account
   sa_must_be_created = !local.sa_use_existing
