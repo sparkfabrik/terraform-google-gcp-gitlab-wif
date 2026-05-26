@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-05-26
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/1.0.0...1.1.0)
+
 ### Added
 
 - Add `gcp_service_account_account_id` and `gcp_service_account_project_id` variables to support explicit, caller-controlled service account creation within the module. This allows callers to specify both the service account name and the target GCP project, removing the need to create the service account outside the module.
@@ -15,6 +19,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Fixed
 
 - Clarify the description of `gcp_existing_service_account_account_id` to indicate that it expects a GCP service account ID (e.g., `my-service-account`), not an email address.
+- Add explicit `project` to `data.google_service_account` lookup for deterministic behavior.
+- Remove invalid `version` argument from VCS source in example.
 
 ## [1.0.0] - 2026-05-20
 
