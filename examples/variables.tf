@@ -9,6 +9,16 @@ variable "gcp_project_id" {
   type        = string
 }
 
+variable "gcp_service_account_account_id" {
+  description = "The account ID of the service account to create for GitLab WIF."
+  type        = string
+}
+
+variable "gcp_service_account_project_id" {
+  description = "The GCP project ID where the service account will be created."
+  type        = string
+}
+
 # GitLab variables
 variable "gitlab_project_ids" {
   description = "The GitLab project IDs to allow access from. Use this for project-level access."

@@ -37,17 +37,32 @@ resource "google_iam_workload_identity_pool_provider" "this" {
 }
 
 resource "google_service_account" "this" {
-  count = var.gcp_existing_service_account_account_id == null ? 1 : 0
+  count = !local.sa_use_existing ? 1 : 0
 
-  project      = var.gcp_project_id
-  account_id   = local.account_id
+  project      = local.sa_project_id
+  account_id   = local.sa_account_id
   display_name = "Service Account for ${var.name}"
+
+  lifecycle {
+    precondition {
+      condition     = (var.gcp_service_account_account_id == null) == (var.gcp_service_account_project_id == null)
+      error_message = "gcp_service_account_account_id and gcp_service_account_project_id must be provided together."
+    }
+  }
 }
 
 data "google_service_account" "this" {
-  count = var.gcp_existing_service_account_account_id != null ? 1 : 0
+  count = local.sa_use_existing ? 1 : 0
 
-  account_id = var.gcp_existing_service_account_account_id
+  account_id = local.sa_account_id
+  project    = local.sa_project_id
+
+  lifecycle {
+    precondition {
+      condition     = var.gcp_service_account_account_id == null && var.gcp_service_account_project_id == null
+      error_message = "gcp_existing_service_account_account_id cannot be used together with gcp_service_account_account_id or gcp_service_account_project_id. Use either the existing service account reuse path or the explicit creation path, not both."
+    }
+  }
 }
 
 resource "google_service_account_iam_member" "this" {

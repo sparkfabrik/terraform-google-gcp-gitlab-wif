@@ -10,7 +10,24 @@ variable "gcp_project_id" {
 }
 
 variable "gcp_existing_service_account_account_id" {
-  description = "The email of an existing service account to use for GitLab WIF."
+  description = "The account ID of an existing service account to reuse for GitLab WIF. This is the short identifier (e.g., `my-service-account`), not the full email address. The service account is looked up in the project specified by `gcp_project_id`. Mutually exclusive with `gcp_service_account_account_id` and `gcp_service_account_project_id`."
+  type        = string
+  default     = null
+}
+
+variable "gcp_service_account_account_id" {
+  description = "The account ID of the service account to create for GitLab WIF. Must be provided together with `gcp_service_account_project_id`. Mutually exclusive with `gcp_existing_service_account_account_id`."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.gcp_service_account_account_id == null || can(regex("^[a-z][a-z0-9-]{4,28}[a-z0-9]$", var.gcp_service_account_account_id))
+    error_message = "gcp_service_account_account_id must be 6-30 characters, start with a lowercase letter, end with a lowercase letter or digit, and contain only lowercase letters, digits, and hyphens."
+  }
+}
+
+variable "gcp_service_account_project_id" {
+  description = "The GCP project ID where the service account will be created. Must be provided together with `gcp_service_account_account_id`. If not set, the module creates the service account in `gcp_project_id` using a generated account ID."
   type        = string
   default     = null
 }
