@@ -28,6 +28,7 @@ make generate-docs    # Lint + regenerate README.md (via terraform-docs)
 - **Markdown formatting.** After creating or editing any `.md` file, always run the formatter. Do not format markdown by hand.
 - **Examples** live in `examples/`. `examples/test.tfvars` is used by tflint and tfsec for validation.
 - **Renovate** manages dependency updates via `renovate.json` (extends SparkFabrik defaults).
+- **Provider version bumps.** Renovate handles routine bumps. Before manually bumping a provider in `versions.tf`, check the Terraform Registry for the latest stable release and any breaking changes in the release notes. Always commit the regenerated `.terraform.lock.hcl` together with the manifest change.
 
 ## Code Style
 
@@ -65,6 +66,7 @@ Keep the description lowercase, imperative, no period.
 
 - Always rebase onto `main` before pushing. No merge commits.
 - Use `--force-with-lease` (never `--force`) after rebasing.
+- Rebase before the first push, before opening a PR, and whenever `main` advances.
 
 ## CI/CD
 
@@ -72,6 +74,23 @@ The project uses GitHub Actions (`.github/workflows/tflint.yml`):
 
 - **Trigger:** push to `main` and pull request open/sync.
 - **Job:** `tflint` — runs tflint on the module to validate HCL.
+
+## OpenSpec Change Management
+
+Spec artifacts live in `openspec/changes/<name>/`, archived in `openspec/changes/archive/YYYY-MM-DD-<name>/`. Capabilities (long-lived specs) live in `openspec/specs/`. Configuration: `openspec/config.yaml`.
+
+### Git workflow for specs
+
+OpenSpec is a local file workflow. We add these conventions:
+
+1. **Always commit spec artifacts to git.** Never leave proposals, designs, specs, or tasks untracked. Commit them as soon as they are created or updated.
+2. **Non-trivial changes: spec-first PR.** For changes that span multiple files, involve architectural decisions, or require infrastructure work:
+   - Create a branch (e.g., `docs/<issue>-<name>-spec`).
+   - Commit the proposal, design, specs, and tasks.
+   - Open a PR for review ("is this the right plan?").
+   - Merge the spec PR before starting implementation.
+3. **Trivial changes: spec + implementation in one PR.** For small, well-scoped changes, spec and code can ship together.
+4. **Archive on merge.** When the implementation is complete, move `openspec/changes/<name>/` to `openspec/changes/archive/YYYY-MM-DD-<name>/` as part of that PR or an immediate follow-up. Do not leave completed changes in the active directory.
 
 ## Command Safety
 

@@ -32,6 +32,12 @@ variable "gcp_service_account_project_id" {
   default     = null
 }
 
+variable "use_legacy_pool_provider_id_format" {
+  description = "If true, place the random hex suffix AFTER `var.name` in the workload identity pool and provider IDs (pre-1.0.0 layout: `pool-{name}-{hex}`, `provider-{name}-{hex}`). Default (false) uses the 1.0.0+ layout `pool-{hex}-{name}` / `provider-{hex}-{name}`, which avoids ID collisions when `var.name` is long enough to truncate the random part. Enable this ONLY to keep stability on existing deployments that were created before 1.0.0 and have not yet been migrated. Do not enable for new deployments."
+  type        = bool
+  default     = false
+}
+
 variable "gcp_workload_identity_pool_provider_attribute_mapping" {
   description = "A map of attribute mappings for the GCP Workload Identity Federation provider. This allows you to customize how attributes are mapped from GitLab to GCP."
   type        = map(string)

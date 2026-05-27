@@ -1,6 +1,10 @@
 locals {
-  resource_name_suffix      = "${var.name}-${random_id.suffix.hex}"
-  resource_name_pool_suffix = "${random_id.suffix.hex}-${var.name}"
+  resource_name_suffix = "${var.name}-${random_id.suffix.hex}"
+  resource_name_pool_suffix = (
+    var.use_legacy_pool_provider_id_format
+    ? local.resource_name_suffix
+    : "${random_id.suffix.hex}-${var.name}"
+  )
 
   project_resource_suffix              = "project"
   group_resource_suffix                = "group"
