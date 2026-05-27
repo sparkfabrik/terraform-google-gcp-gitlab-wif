@@ -8,6 +8,12 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Add `gitlab_user_logins` and `gitlab_user_ids` variables to restrict WIF authentication to specific GitLab users. `gitlab_user_logins` accepts usernames and resolves them to immutable numeric user IDs at plan time via the GitLab API (`data.gitlab_user`); `gitlab_user_ids` accepts numeric IDs directly for environments without GitLab API access. When both are set, the resulting ID set is the union. The WIF attribute condition matches on `attribute.user_id` (mapped from `assertion.user_id` by default), which is immutable, so this prevents access from being silently transferred if a username is renamed or freed and reclaimed by another user. A per-user `principalSet` (`attribute.user_id/<id>`) is emitted for each matching user, so the IAM binding self-documents the user gate.
+- Add `gitlab_user_filter_logic` variable controlling how the user filter combines with project/group filters: `and` (default) restricts authentication to tokens that match BOTH a source filter AND a user; `or` lets the listed users authenticate from any project/group (trusted-user bypass).
+- Add `attribute.user_id` (`assertion.user_id`) and `attribute.user_login` (`assertion.user_login`) to the default WIF provider attribute mapping.
+
 ## [1.1.0] - 2026-05-26
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/1.0.0...1.1.0)
