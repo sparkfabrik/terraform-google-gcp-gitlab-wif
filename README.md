@@ -50,6 +50,7 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 | <a name="input_name"></a> [name](#input_name)                                                                                                                                                    | The name to use for all resources created by this module.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `string`                                                                                                                                                                                            | n/a                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |   yes    |
 | <a name="input_secret_gcp_project_id"></a> [secret_gcp_project_id](#input_secret_gcp_project_id)                                                                                                 | The GCP project ID where secrets will be created. If not provided, defaults to `var.gcp_project_id`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `string`                                                                                                                                                                                            | `null`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |    no    |
 | <a name="input_secret_names"></a> [secret_names](#input_secret_names)                                                                                                                            | List of secret names to create and grant access to.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `list(string)`                                                                                                                                                                                      | `[]`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |    no    |
+| <a name="input_use_legacy_pool_provider_id_format"></a> [use_legacy_pool_provider_id_format](#input_use_legacy_pool_provider_id_format)                                                          | If true, place the random hex suffix AFTER `var.name` in the workload identity pool and provider IDs (pre-1.0.0 layout: `pool-{name}-{hex}`, `provider-{name}-{hex}`). Default (false) uses the 1.0.0+ layout `pool-{hex}-{name}` / `provider-{hex}-{name}`, which avoids ID collisions when `var.name` is long enough to truncate the random part. Enable this ONLY to keep stability on existing deployments that were created before 1.0.0 and have not yet been migrated. Do not enable for new deployments.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `bool`                                                                                                                                                                                              | `false`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |    no    |
 
 ## Outputs
 
@@ -97,3 +98,61 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 No modules.
 
 <!-- END_TF_DOCS -->
+
+## Recovering a deleted workload identity pool or provider
+
+Google Cloud **soft-deletes** workload identity pools and providers. When the resources managed by this module are destroyed (for example, by `terraform destroy`, or by a `terraform apply` that replaces them), they are not removed immediately. Instead:
+
+- Both pools and providers stay in a `DELETED` state for **up to 30 days**, after which the deletion becomes permanent ([source](https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers)).
+- Deleting a pool also deletes all of its providers ("When you delete a workload identity pool, you also delete its workload identity pool providers." — [source](https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers)).
+- While the resource is in the `DELETED` state, its ID **cannot be reused** to create a new pool or provider with the same name. From the docs: "Until a pool is permanently deleted, you cannot reuse its name when creating a new workload identity pool." The same restriction applies to providers.
+
+This matters in two situations:
+
+1. You destroyed the module by mistake and need to bring the same WIF back without changing GitLab CI/CD variables, IAM bindings on third-party resources, or the federation principal strings.
+2. You ran `terraform apply` after upgrading to 1.0.0+ without setting `use_legacy_pool_provider_id_format = true`, the old pool/provider were soft-deleted, and you want to roll back to the pre-1.0.0 layout (set the flag) without waiting 30 days for the IDs to be released.
+
+In both cases, the workflow is **undelete in Google Cloud, then import into Terraform state**. Do not let Terraform try to create a new resource with the same ID — it will fail until the soft-deleted one is purged.
+
+### Step 1: Undelete in Google Cloud
+
+Use `gcloud` (or the Cloud Console "Show deleted pools and providers" toggle described in the [official docs](https://cloud.google.com/iam/docs/manage-workload-identity-pools-providers)).
+
+Undelete the pool first ([gcloud reference](https://cloud.google.com/sdk/gcloud/reference/iam/workload-identity-pools/undelete)):
+
+```bash
+gcloud iam workload-identity-pools undelete POOL_ID \
+  --location=global \
+  --project=PROJECT_ID
+```
+
+Then undelete each provider ([gcloud reference](https://cloud.google.com/sdk/gcloud/reference/iam/workload-identity-pools/providers/undelete)):
+
+```bash
+gcloud iam workload-identity-pools providers undelete PROVIDER_ID \
+  --workload-identity-pool=POOL_ID \
+  --location=global \
+  --project=PROJECT_ID
+```
+
+`POOL_ID` and `PROVIDER_ID` are the short IDs (for example `pool-a1b2c3d4-myname`), not the full resource path. `LOCATION` is always `global` for the pools and providers created by this module.
+
+### Step 2: Import into Terraform state
+
+Once the resources are back to `ACTIVE`, import them into the module state so Terraform stops planning to recreate them. The exact addresses depend on whether the module is rooted at the top level or under a parent module (prefix with `module.<name>.` accordingly).
+
+Pool ([Terraform resource docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iam_workload_identity_pool#import)):
+
+```bash
+terraform import google_iam_workload_identity_pool.this \
+  projects/PROJECT_ID/locations/global/workloadIdentityPools/POOL_ID
+```
+
+Provider ([Terraform resource docs](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/iam_workload_identity_pool_provider#import)):
+
+```bash
+terraform import google_iam_workload_identity_pool_provider.this \
+  projects/PROJECT_ID/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID
+```
+
+After import, run `terraform plan` and verify that no replacement is queued. If Terraform still wants to replace the pool or provider, the `workload_identity_pool_id` / `workload_identity_pool_provider_id` computed by the module does not match the imported one; check `var.name`, the `random_id.suffix` value (`terraform state show random_id.suffix`), and `use_legacy_pool_provider_id_format`.
