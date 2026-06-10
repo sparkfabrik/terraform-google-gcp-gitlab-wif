@@ -9,3 +9,5 @@ secret_names = [
   "my-secret-1",
   "my-secret-2",
 ]
+gitlab_refs     = ["main"]
+gitlab_ref_type = "branch"

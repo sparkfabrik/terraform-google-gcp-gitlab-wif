@@ -122,6 +122,28 @@ variable "gitlab_user_filter_logic" {
   }
 }
 
+variable "gitlab_refs" {
+  description = "The GitLab pipeline refs (branch or tag names) allowed to authenticate via WIF. When set, the attribute condition gains an `attribute.ref==\"<ref>\"` term (OR'd across the list) that is AND'd onto the rest of the condition, so a token is accepted only when the pipeline ran on one of these refs in addition to any user/project/group filter. This binds federation to the intended execution context (for example a dedicated automation trigger branch), so a principal that can otherwise authenticate cannot mint credentials from an arbitrary ref. Empty (the default) adds no ref term and leaves the condition unchanged. `attribute.ref` is mapped from `assertion.ref` by the default attribute mapping; if you override gcp_workload_identity_pool_provider_attribute_mapping, keep that mapping."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.gitlab_refs) == 0 || alltrue([for r in var.gitlab_refs : length(r) > 0 && r == trimspace(r)])
+    error_message = "gitlab_refs must be a list of non-empty ref names with no leading or trailing whitespace, or an empty list."
+  }
+}
+
+variable "gitlab_ref_type" {
+  description = "Optionally restrict the attribute condition to a GitLab ref type, `branch` or `tag`. When set, an `attribute.ref_type==\"<type>\"` term is AND'd onto the condition (alongside gitlab_refs when also set), so for example only branch pipelines federate. `null` (the default) adds no ref-type term. `attribute.ref_type` is mapped from `assertion.ref_type` by the default attribute mapping; if you override the mapping, keep it. Setting gitlab_ref_type without gitlab_refs is allowed (gate by type only)."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.gitlab_ref_type == null ? true : contains(["branch", "tag"], var.gitlab_ref_type)
+    error_message = "gitlab_ref_type must be either \"branch\" or \"tag\", or null to add no ref-type term."
+  }
+}
+
 variable "gitlab_instance_url" {
   description = "The URL of your GitLab instance."
   type        = string

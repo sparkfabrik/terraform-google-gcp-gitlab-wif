@@ -32,18 +32,38 @@ locals {
     local.has_group_filters ? local.groups_attribute_condition : "",
   ]))
 
-  # Final attribute_condition.
+  # Base attribute_condition (source/user filters), before any ref gate.
   # - No user filter: just the source condition.
   # - User filter + no source: just the user condition (only users allowed).
   # - User filter + source + logic=and: source AND user (restrict who from those sources).
   # - User filter + source + logic=or:  source OR  user (trusted-user bypass).
-  attribute_condition = local.has_user_filters ? (
+  base_attribute_condition = local.has_user_filters ? (
     local.has_any_source ? (
       local.user_filter_is_or
       ? "(${local.source_attribute_condition}) || ${local.users_attribute_condition}"
       : "(${local.source_attribute_condition}) && ${local.users_attribute_condition}"
     ) : local.users_attribute_condition
   ) : local.source_attribute_condition
+
+  # Optional ref gate: restrict WHICH pipeline ref (and ref type) may authenticate,
+  # AND'd onto the base condition so it binds federation to the intended execution
+  # context regardless of who/where the token comes from. attribute.ref and
+  # attribute.ref_type are mapped from assertion.ref / assertion.ref_type.
+  has_ref_filters          = length(var.gitlab_refs) > 0
+  refs_attribute_condition = "(${join(" || ", [for ref in var.gitlab_refs : "attribute.ref==\"${ref}\""])})"
+  ref_attribute_terms = compact([
+    local.has_ref_filters ? local.refs_attribute_condition : "",
+    var.gitlab_ref_type != null ? "attribute.ref_type==\"${var.gitlab_ref_type}\"" : "",
+  ])
+  ref_attribute_condition = join(" && ", local.ref_attribute_terms)
+
+  # Final attribute_condition: base AND the ref gate when a ref filter is set. With
+  # no base (instance-wide), the ref gate stands alone.
+  attribute_condition = (
+    length(local.ref_attribute_terms) > 0
+    ? (local.base_attribute_condition != "" ? "(${local.base_attribute_condition}) && ${local.ref_attribute_condition}" : local.ref_attribute_condition)
+    : local.base_attribute_condition
+  )
 
   final_gitlab_group_full_paths = concat(
     [for item in data.gitlab_group.this : item.full_path],
