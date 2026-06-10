@@ -139,7 +139,7 @@ variable "gitlab_ref_type" {
   default     = null
 
   validation {
-    condition     = var.gitlab_ref_type == null || contains(["branch", "tag"], var.gitlab_ref_type)
+    condition     = var.gitlab_ref_type == null ? true : contains(["branch", "tag"], var.gitlab_ref_type)
     error_message = "gitlab_ref_type must be either \"branch\" or \"tag\", or null to add no ref-type term."
   }
 }
