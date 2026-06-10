@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-06-10
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/1.2.0...1.3.0)
+
 ### Added
 
 - Add `gitlab_refs` and `gitlab_ref_type` variables to gate WIF authentication on the GitLab pipeline ref. `gitlab_refs` accepts branch or tag names and adds an `attribute.ref=="<ref>"` term (OR'd across the list); `gitlab_ref_type` optionally adds `attribute.ref_type=="branch"|"tag"`. The ref gate is AND'd onto the existing user/project/group condition, so a token is accepted only when the pipeline ran on one of the listed refs in addition to any other filter. This binds federation to the intended execution context (for example a dedicated automation trigger branch), so a principal that can otherwise authenticate cannot mint credentials from an arbitrary ref. Both default to empty/null (no ref term, condition unchanged). `attribute.ref` and `attribute.ref_type` are already mapped from `assertion.ref` / `assertion.ref_type` by the default attribute mapping.
