@@ -189,6 +189,6 @@ locals {
 
   gitlab_variables_additional_final = {
     for item in concat(local.gitlab_variables_additional_group, local.gitlab_variables_additional_project) :
-    "${item.key}--${item.environment_scope}--${item.gitlab_resource_type}--${item.gitlab_resource_id}" => item
+    "${item.key}${item.environment_scope == "*" ? "" : "--${item.environment_scope}"}--${item.gitlab_resource_type}--${item.gitlab_resource_id}" => item
   }
 }

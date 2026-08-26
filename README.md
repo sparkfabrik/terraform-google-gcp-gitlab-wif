@@ -9,8 +9,8 @@ You can refer to the official [GitLab documentation](https://docs.gitlab.com/ci/
 
 | Name | Version |
 |------|---------|
-| <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | 18.11.0 |
-| <a name="provider_google"></a> [google](#provider\_google) | 7.32.0 |
+| <a name="provider_gitlab"></a> [gitlab](#provider\_gitlab) | 19.0.0 |
+| <a name="provider_google"></a> [google](#provider\_google) | 7.36.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.9.0 |
 
 ## Requirements
