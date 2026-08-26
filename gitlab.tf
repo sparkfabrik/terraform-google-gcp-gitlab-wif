@@ -65,12 +65,13 @@ resource "gitlab_group_variable" "gitlab_variables_additional" {
     for key, val in local.gitlab_variables_additional_final : key => val if val.gitlab_resource_type == local.group_resource_suffix
   } : {}
 
-  group       = each.value.gitlab_resource_id
-  key         = each.value.key
-  value       = each.value.value
-  description = each.value.description
-  protected   = each.value.protected
-  masked      = each.value.masked
+  group             = each.value.gitlab_resource_id
+  key               = each.value.key
+  value             = each.value.value
+  description       = each.value.description
+  protected         = each.value.protected
+  masked            = each.value.masked
+  environment_scope = each.value.environment_scope
 }
 
 # Project variables if `var.gitlab_project_id` is provided
@@ -123,10 +124,11 @@ resource "gitlab_project_variable" "gitlab_variables_additional" {
     for key, val in local.gitlab_variables_additional_final : key => val if val.gitlab_resource_type == local.project_resource_suffix
   } : {}
 
-  project     = each.value.gitlab_resource_id
-  key         = each.value.key
-  value       = each.value.value
-  description = each.value.description
-  protected   = each.value.protected
-  masked      = each.value.masked
+  project           = each.value.gitlab_resource_id
+  key               = each.value.key
+  value             = each.value.value
+  description       = each.value.description
+  protected         = each.value.protected
+  masked            = each.value.masked
+  environment_scope = each.value.environment_scope
 }

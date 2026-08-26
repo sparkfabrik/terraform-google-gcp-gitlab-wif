@@ -195,10 +195,11 @@ variable "gitlab_variables_description_manager_name" {
 variable "gitlab_variables_additional" {
   description = "Additional GitLab variables to create. This should be a map where the key is the variable name and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied."
   type = map(object({
-    value       = string
-    protected   = optional(bool, false)
-    masked      = optional(bool, false)
-    description = optional(string, "Managed by {{MANAGER_NAME}}.")
+    value             = string
+    protected         = optional(bool, false)
+    masked            = optional(bool, false)
+    description       = optional(string, "Managed by {{MANAGER_NAME}}.")
+    environment_scope = optional(string, "*")
   }))
   default = {}
 }
