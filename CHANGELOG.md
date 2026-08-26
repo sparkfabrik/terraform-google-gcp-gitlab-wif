@@ -8,6 +8,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- Add an optional `environment_scope` field (default `"*"`) to the `gitlab_variables_additional` object type, plumbed through to both the `gitlab_project_variable` and `gitlab_group_variable` additional-variable resources. The default `"*"` matches GitLab's implicit default scope, so existing consumers are unchanged.
+- Add an optional `key` field to the `gitlab_variables_additional` object type. The GitLab variable name defaults to the map key; setting `key` overrides it, turning the map key into a stable label. This lets a consumer declare the same variable name at multiple environment scopes (e.g. one entry per cluster environment) by using distinct map keys with the same `key`. A validation rejects duplicate (name, environment_scope) pairs. Entries without a `key` override keep their previous resource addresses, so existing consumers see no plan changes.
+
 ## [1.3.0] - 2026-06-10
 
 [Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/1.2.0...1.3.0)
