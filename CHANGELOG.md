@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-08-26
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/1.3.0...1.4.0)
+
 ### Added
 
 - Add an optional `environment_scope` field (default `"*"`) to the `gitlab_variables_additional` object type, plumbed through to both the `gitlab_project_variable` and `gitlab_group_variable` additional-variable resources. The default `"*"` matches GitLab's implicit default scope, so existing consumers are unchanged.
