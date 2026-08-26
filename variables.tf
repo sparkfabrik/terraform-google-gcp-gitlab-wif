@@ -193,7 +193,7 @@ variable "gitlab_variables_description_manager_name" {
 }
 
 variable "gitlab_variables_additional" {
-  description = "Additional GitLab variables to create. This should be a map where the key is the variable name and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied. The GitLab variable name defaults to the map key; set the optional `key` field to override it. This lets you declare the same variable name more than once at different `environment_scope` values (e.g. one entry per cluster environment) by giving each entry a distinct map key (used only as a stable label) and the same `key`. Each (name, environment_scope) pair must be unique."
+  description = "Additional GitLab variables to create. This should be a map where the key is a stable label and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied. The GitLab variable name defaults to the map key; set the optional `key` field to override it. This lets you declare the same variable name more than once at different `environment_scope` values (e.g. one entry per cluster environment) by giving each entry a distinct map key (used only as a stable label) and the same `key`. Each (name, environment_scope) pair must be unique."
   type = map(object({
     key               = optional(string)
     value             = string
@@ -206,7 +206,7 @@ variable "gitlab_variables_additional" {
 
   validation {
     condition = length(distinct([
-      for label, item in var.gitlab_variables_additional : "${coalesce(item.key, label)}--${item.environment_scope}"
+      for label, item in var.gitlab_variables_additional : jsonencode([coalesce(item.key, label), item.environment_scope])
     ])) == length(var.gitlab_variables_additional)
     error_message = "gitlab_variables_additional entries must have a unique combination of variable name (the `key` field, defaulting to the map key) and environment_scope."
   }
