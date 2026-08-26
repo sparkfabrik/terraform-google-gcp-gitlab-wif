@@ -157,15 +157,21 @@ locals {
 
   gitlab_variables_description = replace(var.gitlab_variables_description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
 
+  # The map key is a stable label used only for resource addressing; the GitLab
+  # variable name is the optional `key` field, defaulting to the label. This lets
+  # the same variable name exist at multiple environment scopes (distinct labels,
+  # same `key`). For entries without a `key` override the label equals the name,
+  # so pre-existing resource addresses are unchanged.
   gitlab_variables_additional_group = flatten([
     for gitlab_resource_id in var.gitlab_group_ids : [
-      for key, value in var.gitlab_variables_additional : [
+      for label, value in var.gitlab_variables_additional : [
         merge(
           value,
           {
             gitlab_resource_type = local.group_resource_suffix,
             gitlab_resource_id   = gitlab_resource_id,
-            key                  = key,
+            label                = label,
+            key                  = coalesce(value.key, label),
             description          = replace(value.description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
           }
         )
@@ -174,21 +180,24 @@ locals {
 
   gitlab_variables_additional_project = flatten([
     for gitlab_resource_id in var.gitlab_project_ids : [
-      for key, value in var.gitlab_variables_additional : [
+      for label, value in var.gitlab_variables_additional : [
         merge(
           value,
           {
             gitlab_resource_type = local.project_resource_suffix,
             gitlab_resource_id   = gitlab_resource_id,
-            key                  = key,
+            label                = label,
+            key                  = coalesce(value.key, label),
             description          = replace(value.description, "{{MANAGER_NAME}}", var.gitlab_variables_description_manager_name)
           }
         )
       ]
   ]])
 
+  # Labels are unique per map by construction, so the label alone keeps the
+  # for_each key unique per resource type and ID.
   gitlab_variables_additional_final = {
     for item in concat(local.gitlab_variables_additional_group, local.gitlab_variables_additional_project) :
-    "${item.key}${item.environment_scope == "*" ? "" : "--${item.environment_scope}"}--${item.gitlab_resource_type}--${item.gitlab_resource_id}" => item
+    "${item.label}--${item.gitlab_resource_type}--${item.gitlab_resource_id}" => item
   }
 }
