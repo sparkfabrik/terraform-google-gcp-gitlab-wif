@@ -193,7 +193,7 @@ variable "gitlab_variables_description_manager_name" {
 }
 
 variable "gitlab_variables_additional" {
-  description = "Additional GitLab variables to create. This should be a map where the key is a stable label and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied. The GitLab variable name defaults to the map key; set the optional `key` field to override it. This lets you declare the same variable name more than once at different `environment_scope` values (e.g. one entry per cluster environment) by giving each entry a distinct map key (used only as a stable label) and the same `key`. Each (name, environment_scope) pair must be unique."
+  description = "Additional GitLab variables to create. This should be a map where the key is a stable label and the value is an object containing the variable properties. This allows you to define custom variables for project or group where the module is applied. The GitLab variable name defaults to the map key; set the optional `key` field to override it. This lets you declare the same variable name more than once at different `environment_scope` values (e.g. one entry per cluster environment) by giving each entry a distinct map key (used only as a stable label) and the same `key`. Each (name, environment_scope) pair must be unique. Set the optional `variable_type` field to `\"file\"` to create a File-type variable (GitLab writes the value to a temporary file and exposes its path); it defaults to `\"env_var\"`."
   type = map(object({
     key               = optional(string)
     value             = string
@@ -201,6 +201,7 @@ variable "gitlab_variables_additional" {
     masked            = optional(bool, false)
     description       = optional(string, "Managed by {{MANAGER_NAME}}.")
     environment_scope = optional(string, "*")
+    variable_type     = optional(string, "env_var")
   }))
   default = {}
 
@@ -214,6 +215,11 @@ variable "gitlab_variables_additional" {
   validation {
     condition     = alltrue([for label, item in var.gitlab_variables_additional : item.key == null || can(regex("^\\S+$", coalesce(item.key, "")))])
     error_message = "gitlab_variables_additional `key` overrides must be non-empty and contain no whitespace."
+  }
+
+  validation {
+    condition     = alltrue([for label, item in var.gitlab_variables_additional : contains(["env_var", "file"], item.variable_type)])
+    error_message = "gitlab_variables_additional `variable_type` must be either \"env_var\" or \"file\"."
   }
 }
 
