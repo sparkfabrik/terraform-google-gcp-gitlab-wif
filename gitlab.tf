@@ -72,6 +72,7 @@ resource "gitlab_group_variable" "gitlab_variables_additional" {
   protected         = each.value.protected
   masked            = each.value.masked
   environment_scope = each.value.environment_scope
+  variable_type     = each.value.variable_type
 }
 
 # Project variables if `var.gitlab_project_id` is provided
@@ -131,4 +132,5 @@ resource "gitlab_project_variable" "gitlab_variables_additional" {
   protected         = each.value.protected
   masked            = each.value.masked
   environment_scope = each.value.environment_scope
+  variable_type     = each.value.variable_type
 }
