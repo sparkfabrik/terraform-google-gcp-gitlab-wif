@@ -8,6 +8,10 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-08-27
+
+[Compare with previous version](https://github.com/sparkfabrik/terraform-google-gcp-gitlab-wif/compare/1.4.0...1.5.0)
+
 ### Added
 
 - Add an optional `variable_type` field (default `"env_var"`) to the `gitlab_variables_additional` object type, plumbed through to both the `gitlab_project_variable` and `gitlab_group_variable` additional-variable resources. Set it to `"file"` to create a File-type variable, where GitLab writes the value to a temporary file and exposes its path to the job. A validation rejects any other value. The default matches GitLab's implicit variable type, so existing consumers are unchanged.
